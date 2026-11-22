@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Основная тема задаётся в Compose (ui/theme). Эта нужна только для окна при запуске. -->
+    <style name="Theme.Alias" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
