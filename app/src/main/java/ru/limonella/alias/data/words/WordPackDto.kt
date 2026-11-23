@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import ru.limonella.alias.core.model.Word
 
 /**
- * Формат файла с набором слов (assets/words/*.json, позже — из репозитория alias-words).
+ * Формат файла с набором слов (JSON-файлы в папке assets/words, позже — из репозитория alias-words).
  * Новые поля добавляем со значением по умолчанию, чтобы старые файлы продолжали читаться.
  */
 @Serializable
