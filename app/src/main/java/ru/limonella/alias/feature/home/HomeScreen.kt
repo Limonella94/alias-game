@@ -14,6 +14,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Row
+import ru.limonella.alias.data.session.SavedGame
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,10 +36,14 @@ import androidx.compose.ui.unit.dp
 fun HomeScreen(
     onPlay: () -> Unit,
     onKids: () -> Unit,
+    onContinueGame: () -> Unit,
 ) {
     val container = appContainer()
-    val viewModel: HomeViewModel = viewModel { HomeViewModel(container.updateManager) }
+    val viewModel: HomeViewModel = viewModel {
+        HomeViewModel(container.updateManager, container.savedGameStore, container.gameSessionStore)
+    }
     val update by viewModel.update.collectAsStateWithLifecycle()
+    val savedGame by viewModel.savedGame.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -59,6 +67,18 @@ fun HomeScreen(
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(48.dp))
+        val saved = savedGame
+        if (saved != null) {
+            ContinueCard(
+                saved = saved,
+                onContinue = {
+                    viewModel.continueGame(saved)
+                    onContinueGame()
+                },
+                onDiscard = viewModel::discardSavedGame,
+            )
+            Spacer(Modifier.height(16.dp))
+        }
         ModeCard(
             title = "Играть",
             subtitle = "Команды, таймер, очки",
@@ -80,6 +100,44 @@ fun HomeScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+/** Карточка незаконченной игры: счёт и кнопки «Продолжить» / «Удалить». */
+@Composable
+private fun ContinueCard(saved: SavedGame, onContinue: () -> Unit, onDiscard: () -> Unit) {
+    val state = saved.state
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Text(
+                "Незаконченная игра · раунд ${state.roundNumber}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSecondary,
+            )
+            Text(
+                state.config.teams.joinToString("  ·  ") { "${it.name} ${state.scores[it.id] ?: 0}" },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondary,
+            )
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = onContinue,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onSecondary,
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                    ),
+                ) { Text("Продолжить") }
+                TextButton(onClick = onDiscard) {
+                    Text("Удалить", color = MaterialTheme.colorScheme.onSecondary)
+                }
+            }
+        }
     }
 }
 

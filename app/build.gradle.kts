@@ -11,7 +11,7 @@ val gitCommitCount: Int = runCatching {
         .standardOutput.asText.get().trim().toInt()
 }.getOrDefault(1)
 val appVersionCode = gitCommitCount
-val appVersionName = "0.3.$gitCommitCount"
+val appVersionName = "0.4.$gitCommitCount"
 
 // Ключ подписи для CI: если задан (из секретов GitHub) — подписываем им, иначе общим debug.keystore.
 val ciKeystorePath: String? = System.getenv("SIGNING_KEYSTORE_PATH")
@@ -98,6 +98,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
 }

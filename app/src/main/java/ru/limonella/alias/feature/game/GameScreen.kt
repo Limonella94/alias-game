@@ -36,7 +36,13 @@ fun GameScreen(
 ) {
     val container = appContainer()
     val viewModel: GameViewModel = viewModel {
-        GameViewModel(container.gameSessionStore, container.wordRepository, container.soundPlayer)
+        GameViewModel(
+            sessionStore = container.gameSessionStore,
+            wordRepository = container.wordRepository,
+            soundPlayer = container.soundPlayer,
+            savedGames = container.savedGameStore,
+            wordHistory = container.wordHistory,
+        )
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     var showExitDialog by remember { mutableStateOf(false) }
@@ -51,13 +57,13 @@ fun GameScreen(
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text("Выйти из игры?") },
-            text = { Text("Текущая игра не сохранится.") },
+            title = { Text("Выйти в меню?") },
+            text = { Text("Игра сохранится — её можно будет продолжить с главного экрана.") },
             confirmButton = {
                 TextButton(onClick = {
                     showExitDialog = false
                     onExitToMenu()
-                }) { Text("Выйти") }
+                }) { Text("В меню") }
             },
             dismissButton = {
                 TextButton(onClick = { showExitDialog = false }) { Text("Остаться") }

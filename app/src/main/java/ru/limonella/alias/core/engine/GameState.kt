@@ -1,11 +1,13 @@
 package ru.limonella.alias.core.engine
 
+import kotlinx.serialization.Serializable
 import ru.limonella.alias.core.model.GameConfig
 import ru.limonella.alias.core.model.RuleSet
 import ru.limonella.alias.core.model.Team
 import ru.limonella.alias.core.model.Word
 
 /** Этапы игры. Экран игры просто показывает то, что соответствует текущему этапу. */
+@Serializable
 enum class Phase {
     /** Ждём, пока команда нажмёт «Старт». */
     READY,
@@ -23,8 +25,10 @@ enum class Phase {
     FINISHED,
 }
 
+@Serializable
 enum class Outcome { GUESSED, SKIPPED }
 
+@Serializable
 data class WordResult(
     val word: Word,
     val outcome: Outcome,
@@ -35,7 +39,23 @@ fun RuleSet.pointsFor(outcome: Outcome): Int = when (outcome) {
     Outcome.SKIPPED -> skipPoints
 }
 
-/** Неизменяемый снимок состояния игры. */
+/** Итог одного сыгранного раунда — для статистики. */
+@Serializable
+data class RoundRecord(
+    val roundNumber: Int,
+    val teamId: Int,
+    val explainer: String?,
+    val guessed: Int,
+    val skipped: Int,
+    val points: Int,
+    val lastWordTeamId: Int?,
+)
+
+/**
+ * Неизменяемый снимок состояния игры. Сериализуется целиком —
+ * так прерванную игру можно сохранить и продолжить.
+ */
+@Serializable
 data class GameState(
     val config: GameConfig,
     val scores: Map<Int, Int>,
@@ -47,8 +67,21 @@ data class GameState(
     val lastWord: Word? = null,
     val lastWordTeamId: Int? = null,
     val winners: List<Team> = emptyList(),
+    /** Чья очередь объяснять в каждой команде: id команды → индекс игрока. */
+    val explainerIndexByTeam: Map<Int, Int> = emptyMap(),
+    /** Сыгранные раунды по порядку. */
+    val history: List<RoundRecord> = emptyList(),
 ) {
     val currentTeam: Team get() = config.teams[currentTeamIndex]
+
+    /** Кто объясняет в этом раунде; null — игроки в команде не указаны. */
+    val currentExplainer: String? get() = explainerOf(currentTeam)
+
+    fun explainerOf(team: Team): String? {
+        if (team.players.isEmpty()) return null
+        val index = explainerIndexByTeam[team.id] ?: 0
+        return team.players[index % team.players.size]
+    }
 
     /** Сколько очков текущая команда получит за этот раунд. */
     val roundPoints: Int

@@ -1,5 +1,7 @@
 package ru.limonella.alias.core.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Какие слова брать в игру.
  *
@@ -7,6 +9,7 @@ package ru.limonella.alias.core.model
  * @param categories пустое множество = все категории.
  * @param maxAgeMin если задано — только слова, подходящие этому возрасту.
  */
+@Serializable
 data class WordFilter(
     val levels: Set<Int> = setOf(1, 2, 3),
     val packIds: Set<String> = emptySet(),

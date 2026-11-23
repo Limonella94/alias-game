@@ -60,6 +60,24 @@ internal fun ReadyContent(game: GameState, onStart: () -> Unit) {
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
         )
+        val explainer = game.currentExplainer
+        if (explainer != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Объясняет: $explainer",
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+            )
+            val guessers = game.currentTeam.players.filter { it != explainer }
+            if (guessers.isNotEmpty()) {
+                Text(
+                    "Отгадывают: ${guessers.joinToString()}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
         Spacer(Modifier.height(32.dp))
         ScoreBoard(game, highlightTeamId = game.currentTeam.id, modifier = Modifier.weight(1f))
         Spacer(Modifier.height(16.dp))
@@ -83,7 +101,7 @@ internal fun RoundContent(
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                game.currentTeam.name,
+                listOfNotNull(game.currentExplainer, game.currentTeam.name).joinToString(" · "),
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

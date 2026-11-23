@@ -1,6 +1,9 @@
 package ru.limonella.alias.core.model
 
+import kotlinx.serialization.Serializable
+
 /** Всё, что выбрано на экране настроек перед началом игры. */
+@Serializable
 data class GameConfig(
     val teams: List<Team>,
     val rules: RuleSet,

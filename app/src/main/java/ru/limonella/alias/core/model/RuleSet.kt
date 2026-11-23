@@ -1,6 +1,9 @@
 package ru.limonella.alias.core.model
 
+import kotlinx.serialization.Serializable
+
 /** Что происходит со словом, которое объясняли в момент окончания времени. */
+@Serializable
 enum class LastWordRule {
     /** Слово сгорает, раунд сразу заканчивается. */
     NONE,
@@ -21,6 +24,7 @@ enum class LastWordRule {
  * @param pointsToWin до скольких очков играем; null — без победителя.
  * @param lastWord правило последнего слова.
  */
+@Serializable
 data class RuleSet(
     val roundSeconds: Int?,
     val skipPoints: Int,

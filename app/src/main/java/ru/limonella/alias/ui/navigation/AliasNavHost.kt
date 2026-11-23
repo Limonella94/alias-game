@@ -27,6 +27,7 @@ fun AliasNavHost(navController: NavHostController = rememberNavController()) {
             HomeScreen(
                 onPlay = { navController.navigate(SetupRoute) },
                 onKids = { navController.navigate(KidsRoute) },
+                onContinueGame = { navController.navigate(GameRoute) },
             )
         }
         composable<SetupRoute> {
@@ -47,7 +48,14 @@ fun AliasNavHost(navController: NavHostController = rememberNavController()) {
         composable<GameRoute> {
             GameScreen(
                 onExitToMenu = { navController.popBackStack(route = HomeRoute, inclusive = false) },
-                onNewGame = { navController.popBackStack(route = SetupRoute, inclusive = false) },
+                onNewGame = {
+                    // Если игру продолжили с главного экрана, экрана настроек в истории нет — открываем его.
+                    if (!navController.popBackStack(route = SetupRoute, inclusive = false)) {
+                        navController.navigate(SetupRoute) {
+                            popUpTo<HomeRoute> { inclusive = false }
+                        }
+                    }
+                },
                 // Те же настройки уже лежат в GameSessionStore — просто открываем игру заново.
                 onRematch = {
                     navController.navigate(GameRoute) {

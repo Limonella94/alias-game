@@ -1,5 +1,7 @@
 package ru.limonella.alias.core.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Одно слово для объяснения.
  *
@@ -9,6 +11,7 @@ package ru.limonella.alias.core.model
  * @param image ссылка/путь к картинке (для детского режима), null — без картинки.
  * @param packId из какого набора (темы) слово.
  */
+@Serializable
 data class Word(
     val id: String,
     val text: String,

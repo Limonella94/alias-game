@@ -5,7 +5,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import ru.limonella.alias.data.session.GameSessionStore
+import ru.limonella.alias.data.session.SavedGame
+import ru.limonella.alias.data.session.SavedGameStore
 import kotlinx.coroutines.launch
 import ru.limonella.alias.data.update.UpdateInfo
 import ru.limonella.alias.data.update.UpdateManager
@@ -22,7 +27,20 @@ sealed interface UpdateUi {
 
 class HomeViewModel(
     private val updates: UpdateManager,
+    private val savedGames: SavedGameStore,
+    private val sessionStore: GameSessionStore,
 ) : ViewModel() {
+
+    /** Незаконченная игра, если есть. */
+    val savedGame: StateFlow<SavedGame?> = savedGames.saved
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Подготовить продолжение игры; после этого открывается экран игры. */
+    fun continueGame(game: SavedGame) {
+        sessionStore.resume = game
+    }
+
+    fun discardSavedGame() = savedGames.clear()
 
     private val _update = MutableStateFlow<UpdateUi>(UpdateUi.None)
     val update: StateFlow<UpdateUi> = _update.asStateFlow()

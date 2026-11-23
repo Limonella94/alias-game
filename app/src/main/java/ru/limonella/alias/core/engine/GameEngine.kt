@@ -12,15 +12,23 @@ import ru.limonella.alias.core.model.Team
  * Каждое действие заменяет [state] новым снимком.
  * Действия, не подходящие текущему этапу, молча игнорируются.
  */
-class GameEngine(
-    config: GameConfig,
+class GameEngine private constructor(
+    initialState: GameState,
     private val deck: WordDeck,
 ) {
-    var state: GameState = GameState(
-        config = config,
-        scores = config.teams.associate { it.id to 0 },
+    /** Новая игра. */
+    constructor(config: GameConfig, deck: WordDeck) : this(
+        GameState(config = config, scores = config.teams.associate { it.id to 0 }),
+        deck,
     )
+
+    var state: GameState = initialState
         private set
+
+    companion object {
+        /** Продолжить сохранённую игру с того же места. */
+        fun restore(state: GameState, deck: WordDeck): GameEngine = GameEngine(state, deck)
+    }
 
     fun startRound() {
         val s = state
@@ -108,16 +116,38 @@ class GameEngine(
         val teams = s.config.teams
         val scores = s.scores.toMutableMap()
 
-        val currentId = s.currentTeam.id
+        val currentTeam = s.currentTeam
+        val currentId = currentTeam.id
         scores[currentId] = (scores[currentId] ?: 0) + s.roundResults.sumOf { rules.pointsFor(it.outcome) }
         s.lastWordTeamId?.let { id -> scores[id] = (scores[id] ?: 0) + 1 }
+
+        val record = RoundRecord(
+            roundNumber = s.roundNumber,
+            teamId = currentId,
+            explainer = s.currentExplainer,
+            guessed = s.roundResults.count { it.outcome == Outcome.GUESSED },
+            skipped = s.roundResults.count { it.outcome == Outcome.SKIPPED },
+            points = s.roundPoints,
+            lastWordTeamId = s.lastWordTeamId,
+        )
+        // В следующий раз в этой команде объясняет следующий игрок.
+        val explainers = s.explainerIndexByTeam.toMutableMap()
+        if (currentTeam.players.isNotEmpty()) {
+            explainers[currentId] = ((explainers[currentId] ?: 0) + 1) % currentTeam.players.size
+        }
 
         // Победителя определяем только когда все команды сходили одинаковое число раз — так честно.
         val cycleComplete = s.currentTeamIndex == teams.lastIndex
         val winners = findWinners(teams, scores, rules.pointsToWin, cycleComplete)
 
         state = if (winners.size == 1) {
-            s.copy(scores = scores, phase = Phase.FINISHED, winners = winners)
+            s.copy(
+                scores = scores,
+                phase = Phase.FINISHED,
+                winners = winners,
+                history = s.history + record,
+                explainerIndexByTeam = explainers,
+            )
         } else {
             // При ничьей среди лидеров играем ещё круг.
             s.copy(
@@ -128,6 +158,8 @@ class GameEngine(
                 roundResults = emptyList(),
                 lastWord = null,
                 lastWordTeamId = null,
+                history = s.history + record,
+                explainerIndexByTeam = explainers,
             )
         }
     }

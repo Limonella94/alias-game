@@ -38,6 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.limonella.alias.di.appContainer
+import ru.limonella.alias.data.settings.TeamSetup
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -99,20 +103,17 @@ fun SetupScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item { SectionTitle("Команды") }
-            itemsIndexed(state.teamNames) { index, name ->
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { viewModel.renameTeam(index, it) },
-                    label = { Text("Команда ${index + 1}") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    trailingIcon = {
-                        if (state.canRemoveTeam) {
-                            IconButton(onClick = { viewModel.removeTeam(index) }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Удалить команду")
-                            }
-                        }
-                    },
+            itemsIndexed(state.teams) { index, team ->
+                TeamEditor(
+                    index = index,
+                    team = team,
+                    canRemove = state.canRemoveTeam,
+                    canAddPlayer = team.players.size < SetupUiState.MAX_PLAYERS,
+                    onRename = { viewModel.renameTeam(index, it) },
+                    onRemove = { viewModel.removeTeam(index) },
+                    onAddPlayer = { viewModel.addPlayer(index) },
+                    onRenamePlayer = { playerIndex, name -> viewModel.renamePlayer(index, playerIndex, name) },
+                    onRemovePlayer = { playerIndex -> viewModel.removePlayer(index, playerIndex) },
                 )
             }
             if (state.canAddTeam) {
@@ -211,6 +212,25 @@ fun SetupScreen(
                     onCheckedChange = viewModel::setSoundEnabled,
                 )
             }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text("История слов", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "Уже выпадало слов: ${state.shownWordsCount}. Новые слова идут первыми.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    TextButton(
+                        onClick = viewModel::resetWordHistory,
+                        enabled = state.shownWordsCount > 0,
+                    ) { Text("Сбросить") }
+                }
+            }
         }
     }
 }
@@ -222,7 +242,75 @@ fun setupViewModel(
 ): SetupViewModel {
     val container = appContainer()
     return viewModel(viewModelStoreOwner = owner) {
-        SetupViewModel(container.gameSessionStore, container.wordRepository)
+        SetupViewModel(
+            sessionStore = container.gameSessionStore,
+            wordRepository = container.wordRepository,
+            settings = container.setupSettings,
+            wordHistory = container.wordHistory,
+        )
+    }
+}
+
+/** Карточка команды: название и игроки. Игроков можно не указывать. */
+@Composable
+private fun TeamEditor(
+    index: Int,
+    team: TeamSetup,
+    canRemove: Boolean,
+    canAddPlayer: Boolean,
+    onRename: (String) -> Unit,
+    onRemove: () -> Unit,
+    onAddPlayer: () -> Unit,
+    onRenamePlayer: (Int, String) -> Unit,
+    onRemovePlayer: (Int) -> Unit,
+) {
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedTextField(
+                value = team.name,
+                onValueChange = onRename,
+                label = { Text("Команда ${index + 1}") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    if (canRemove) {
+                        IconButton(onClick = onRemove) {
+                            Icon(Icons.Filled.Delete, contentDescription = "Удалить команду")
+                        }
+                    }
+                },
+            )
+            team.players.forEachIndexed { playerIndex, player ->
+                OutlinedTextField(
+                    value = player,
+                    onValueChange = { onRenamePlayer(playerIndex, it) },
+                    placeholder = { Text("Игрок ${playerIndex + 1}") },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp),
+                    trailingIcon = {
+                        IconButton(onClick = { onRemovePlayer(playerIndex) }) {
+                            Icon(Icons.Filled.Close, contentDescription = "Убрать игрока")
+                        }
+                    },
+                )
+            }
+            if (canAddPlayer) {
+                TextButton(onClick = onAddPlayer) {
+                    Icon(Icons.Filled.Add, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
+                    Text(if (team.players.isEmpty()) "Добавить игроков (необязательно)" else "Добавить игрока")
+                }
+            }
+        }
     }
 }
 

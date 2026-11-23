@@ -33,6 +33,13 @@ Android-игра Alias на Kotlin + Jetpack Compose. Владелец прое�
   План: Room + загрузка наборов из публичного репозитория `alias-words` (manifest.json с версиями).
 - **DI:** ручной `AppContainer` в `AliasApp`; на экранах — `appContainer()` и `viewModel { ... }`.
 - **Навигация:** Navigation Compose с типобезопасными маршрутами (`ui/navigation/AliasNavHost.kt`).
+- **Хранение:** DataStore Preferences (`data/storage/JsonPreference` — значение как JSON). Ключи:
+  `setup` (последние настройки, `SetupSnapshot`), `saved_game` (незаконченная игра, `SavedGame` = весь `GameState`),
+  `word_history` (id слова → когда выпадало). Модели `core` помечены `@Serializable` — новые поля только с дефолтами,
+  иначе старое сохранение не прочитается (тогда оно молча игнорируется).
+- **Игроки:** `Team.players` (может быть пустым). Очередь объясняющих — `GameState.explainerIndexByTeam`,
+  сыгранные раунды — `GameState.history` (`RoundRecord`, база для статистики).
+- **Колода:** `WordDeck(words, lastShown = история)` — сначала невыпадавшие слова, потом самые давние.
 - Один модуль `:app`, но пакеты разложены так, чтобы позже вынести `core` и `data` в отдельные модули.
 
 ## Формат набора слов

@@ -125,4 +125,62 @@ class GameEngineTest {
         val drawn = List(2) { deck.next().text.lowercase() }.toSet()
         assertEquals(setOf("сова", "кот"), drawn)
     }
+
+    @Test
+    fun explainersRotateWithinTeam() {
+        val a = Team(0, "A", players = listOf("Маша", "Петя"))
+        val b = Team(1, "B", players = listOf("Оля"))
+        val e = GameEngine(
+            GameConfig(listOf(a, b), RuleSet.Classic.copy(lastWord = LastWordRule.NONE, pointsToWin = null)),
+            WordDeck(words, Random(3)),
+        )
+        val explainers = mutableListOf<String?>()
+        repeat(4) {
+            explainers += e.state.currentExplainer
+            e.startRound(); e.timeUp(); e.confirmRound()
+        }
+        assertEquals(listOf("Маша", "Оля", "Петя", "Оля"), explainers)
+        assertEquals("Маша", e.state.currentExplainer)
+    }
+
+    @Test
+    fun teamWithoutPlayersHasNoExplainer() {
+        val e = engine()
+        assertEquals(null, e.state.currentExplainer)
+    }
+
+    @Test
+    fun roundHistoryIsRecorded() {
+        val e = engine(RuleSet.Classic.copy(lastWord = LastWordRule.NONE))
+        e.startRound(); e.markGuessed(); e.markGuessed(); e.markSkipped(); e.timeUp(); e.confirmRound()
+        val record = e.state.history.single()
+        assertEquals(teamA.id, record.teamId)
+        assertEquals(2, record.guessed)
+        assertEquals(1, record.skipped)
+        assertEquals(1, record.points)
+    }
+
+    @Test
+    fun restoredEngineContinuesFromState() {
+        val e = engine()
+        e.startRound(); e.markGuessed()
+        val saved = e.state
+        val restored = GameEngine.restore(saved, WordDeck(words, Random(9)))
+        assertEquals(saved, restored.state)
+        restored.timeUp(); restored.resolveLastWord(null); restored.confirmRound()
+        assertEquals(1, restored.state.scores[teamA.id])
+    }
+
+    @Test
+    fun deckGivesUnseenWordsFirst() {
+        val seenAll = words.drop(2).associate { it.id to 1000L }
+        val deck = WordDeck(words, Random(5), lastShown = seenAll)
+        val firstTwo = setOf(deck.next().id, deck.next().id)
+        assertEquals(setOf("w1", "w2"), firstTwo)
+        // затем — самые давние из уже показанных
+        val older = words.drop(2).associate { it.id to if (it.id == "w7") 1L else 1000L }
+        val deck2 = WordDeck(words, Random(5), lastShown = older)
+        deck2.next(); deck2.next()
+        assertEquals("w7", deck2.next().id)
+    }
 }
