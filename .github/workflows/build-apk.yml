@@ -71,16 +71,22 @@ jobs:
       - name: Публикация в релиз latest
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
-          gh release delete latest --yes --cleanup-tag || true
-          gh release create latest alias.apk version.json \
-            --target "${{ github.sha }}" \
-            --prerelease \
-            --title "Последняя сборка #${{ github.run_number }}" \
-            --notes "Собрано автоматически из коммита ${{ github.sha }}"
-          # Иногда релиз остаётся черновиком — тогда ссылка на скачивание не работает. Публикуем явно.
-          for i in 1 2 3 4 5; do
-            gh release edit latest --draft=false --prerelease && break
-            sleep 5
+          TITLE="Последняя сборка #${{ github.run_number }}"
+          NOTES="Собрано автоматически из коммита ${{ github.sha }}"
+          # Застрявшие черновики (раньше появлялись, когда релиз пересоздавался с удалением тега) — убираем.
+          for id in $(gh api "repos/$REPO/releases" --jq '.[] | select(.draft) | .id'); do
+            gh api -X DELETE "repos/$REPO/releases/$id" || true
           done
+          # Релиз не пересоздаём: заменяем файлы в существующем. Тег не трогаем — иначе GitHub делает релиз черновиком.
+          if gh release view latest --json isDraft >/dev/null 2>&1; then
+            gh release upload latest alias.apk version.json --clobber
+            gh release edit latest --draft=false --prerelease --title "$TITLE" --notes "$NOTES"
+          else
+            gh release create latest alias.apk version.json \
+              --target "${{ github.sha }}" --prerelease --title "$TITLE" --notes "$NOTES"
+          fi
+          sleep 5
           test "$(gh release view latest --json isDraft --jq .isDraft)" = "false"
+          curl -fsSL -o /dev/null "https://github.com/$REPO/releases/download/latest/version.json"
