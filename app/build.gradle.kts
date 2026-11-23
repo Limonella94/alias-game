@@ -17,6 +17,17 @@ android {
         versionName = "0.1.0"
     }
 
+    // Общий debug-ключ в репозитории: APK из GitHub и из Android Studio подписаны одинаково,
+    // поэтому одно ставится поверх другого без удаления. Для публикации в магазин будет отдельный ключ.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
