@@ -17,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -38,6 +40,9 @@ fun GameScreen(
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     var showExitDialog by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+    // Лёгкая вибрация, чтобы объясняющий чувствовал, что нажатие/свайп засчитан.
+    val vibrate = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
 
     KeepScreenOn()
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.pauseIfPlaying() }
@@ -80,13 +85,25 @@ fun GameScreen(
                     game = game,
                     secondsLeft = ui.secondsLeft,
                     paused = ui.paused,
-                    onGuessed = viewModel::markGuessed,
-                    onSkipped = viewModel::markSkipped,
+                    onGuessed = {
+                        vibrate()
+                        viewModel.markGuessed()
+                    },
+                    onSkipped = {
+                        vibrate()
+                        viewModel.markSkipped()
+                    },
                     onTogglePause = viewModel::togglePause,
                     onFinishRound = viewModel::finishRound,
                 )
 
-                Phase.LAST_WORD -> LastWordContent(game = game, onResolve = viewModel::resolveLastWord)
+                Phase.LAST_WORD -> LastWordContent(
+                    game = game,
+                    onResolve = { teamId ->
+                        vibrate()
+                        viewModel.resolveLastWord(teamId)
+                    },
+                )
 
                 Phase.REVIEW -> ReviewContent(
                     game = game,
