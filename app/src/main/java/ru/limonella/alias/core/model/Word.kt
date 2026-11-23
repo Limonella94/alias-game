@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
  * @param ageMin минимальный возраст игрока, для которого слово подходит.
  * @param image ссылка/путь к картинке (для детского режима), null — без картинки.
  * @param packId из какого набора (темы) слово.
+ * @param emoji картинка-эмодзи (детский режим), пока нет нарисованной картинки [image].
  */
 @Serializable
 data class Word(
@@ -20,4 +21,5 @@ data class Word(
     val ageMin: Int = 0,
     val image: String? = null,
     val packId: String = "",
+    val emoji: String? = null,
 )

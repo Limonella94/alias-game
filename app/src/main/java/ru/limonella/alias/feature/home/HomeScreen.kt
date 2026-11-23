@@ -89,7 +89,7 @@ fun HomeScreen(
         Spacer(Modifier.height(16.dp))
         ModeCard(
             title = "Детский режим",
-            subtitle = "Для малышей от 3 лет · скоро",
+            subtitle = "Картинки для малышей 3–5 и деток 5–6",
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary,
             onClick = onKids,

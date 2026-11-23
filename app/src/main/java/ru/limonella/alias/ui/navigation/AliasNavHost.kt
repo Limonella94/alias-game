@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.Serializable
 import ru.limonella.alias.feature.game.GameScreen
 import ru.limonella.alias.feature.home.HomeScreen
+import ru.limonella.alias.feature.kids.KidsLittleScreen
 import ru.limonella.alias.feature.kids.KidsScreen
 import ru.limonella.alias.feature.setup.SetupScreen
 import ru.limonella.alias.feature.themes.ThemesScreen
@@ -19,6 +20,7 @@ import ru.limonella.alias.feature.themes.ThemesScreen
 @Serializable data object GameRoute
 @Serializable data object KidsRoute
 @Serializable data object ThemesRoute
+@Serializable data object KidsLittleRoute
 
 @Composable
 fun AliasNavHost(navController: NavHostController = rememberNavController()) {
@@ -65,7 +67,14 @@ fun AliasNavHost(navController: NavHostController = rememberNavController()) {
             )
         }
         composable<KidsRoute> {
-            KidsScreen(onBack = { navController.popBackStack() })
+            KidsScreen(
+                onBack = { navController.popBackStack() },
+                onLittle = { navController.navigate(KidsLittleRoute) },
+                onStartBigGame = { navController.navigate(GameRoute) },
+            )
+        }
+        composable<KidsLittleRoute> {
+            KidsLittleScreen(onExit = { navController.popBackStack() })
         }
     }
 }

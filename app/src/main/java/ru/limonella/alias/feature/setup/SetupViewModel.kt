@@ -94,6 +94,7 @@ class SetupViewModel(
     init {
         viewModelScope.launch {
             val packs = runCatching { wordRepository.getPacks() }.getOrDefault(emptyList())
+                .filter { it.audience == WordPack.AUDIENCE_ADULT }
             val saved = runCatching { settings.get() }.getOrNull()
             _state.update { s ->
                 val restored = if (saved != null) s.applySnapshot(saved) else s

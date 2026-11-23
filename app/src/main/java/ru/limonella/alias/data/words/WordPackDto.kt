@@ -34,6 +34,7 @@ data class WordPackDto(
         colorArgb = parseColor(color),
         cover = cover,
         wordCountByLevel = words.groupingBy { it.level }.eachCount(),
+        audience = audience,
     )
 
     private fun parseColor(hex: String?): Long? {
@@ -51,6 +52,8 @@ data class WordDto(
     val categories: List<String> = emptyList(),
     val ageMin: Int = 0,
     val image: String? = null,
+    /** Картинка-эмодзи для детского режима. */
+    val emoji: String? = null,
 ) {
     fun toDomain(packId: String) = Word(
         id = id,
@@ -60,5 +63,6 @@ data class WordDto(
         ageMin = ageMin,
         image = image,
         packId = packId,
+        emoji = emoji,
     )
 }

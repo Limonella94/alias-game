@@ -34,6 +34,7 @@ import ru.limonella.alias.core.engine.GameState
 import ru.limonella.alias.core.engine.Outcome
 import ru.limonella.alias.core.engine.WordResult
 import ru.limonella.alias.core.engine.pointsFor
+import ru.limonella.alias.core.model.GameMode
 import ru.limonella.alias.core.model.LastWordRule
 import ru.limonella.alias.core.model.RuleSet
 import ru.limonella.alias.core.model.Word
@@ -144,6 +145,7 @@ internal fun RoundContent(
                     wordKey = word.id + "#" + game.roundResults.size,
                     onGuessed = onGuessed,
                     onSkipped = onSkipped,
+                    emoji = word.emoji,
                 )
             }
         }
@@ -219,6 +221,7 @@ private fun OwnTeamLastWord(game: GameState, onResolve: (Int?) -> Unit) {
                     wordKey = "last#" + word.id,
                     onGuessed = { onResolve(game.currentTeam.id) },
                     onSkipped = { onResolve(null) },
+                    emoji = word.emoji,
                 )
             }
         }
@@ -406,13 +409,15 @@ internal fun FinishedContent(
         Spacer(Modifier.height(16.dp))
         BigButton("Реванш", onRematch)
         Spacer(Modifier.height(8.dp))
-        OutlinedButton(
-            onClick = onNewGame,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-        ) { Text("Новая игра (другие настройки)") }
-        Spacer(Modifier.height(8.dp))
+        if (game.config.mode == GameMode.ADULT) {
+            OutlinedButton(
+                onClick = onNewGame,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+            ) { Text("Новая игра (другие настройки)") }
+            Spacer(Modifier.height(8.dp))
+        }
         OutlinedButton(
             onClick = onMenu,
             modifier = Modifier

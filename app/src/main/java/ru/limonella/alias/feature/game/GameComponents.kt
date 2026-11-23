@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ru.limonella.alias.core.engine.GameState
+import ru.limonella.alias.ui.components.WordPicture
 import ru.limonella.alias.ui.components.WordText
 import kotlin.math.roundToInt
 
@@ -96,6 +97,8 @@ internal fun SwipeableWordCard(
     onGuessed: () -> Unit,
     onSkipped: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Если задан — карточка с картинкой (детский режим). */
+    emoji: String? = null,
 ) {
     val currentOnGuessed by rememberUpdatedState(onGuessed)
     val currentOnSkipped by rememberUpdatedState(onSkipped)
@@ -104,7 +107,7 @@ internal fun SwipeableWordCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(240.dp)
+            .height(if (emoji != null) 300.dp else 240.dp)
             .offset { IntOffset(0, offsetY.roundToInt()) }
             .pointerInput(wordKey) {
                 val threshold = 100.dp.toPx()
@@ -133,7 +136,7 @@ internal fun SwipeableWordCard(
                 .padding(24.dp),
             contentAlignment = Alignment.Center,
         ) {
-            WordText(text)
+            if (emoji != null) WordPicture(emoji = emoji, text = text) else WordText(text)
         }
     }
 }
