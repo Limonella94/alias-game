@@ -5,6 +5,18 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Номер версии = число коммитов в git: растёт с каждым изменением, одинаков локально и в CI.
+val gitCommitCount: Int = runCatching {
+    providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }
+        .standardOutput.asText.get().trim().toInt()
+}.getOrDefault(1)
+val appVersionCode = gitCommitCount
+val appVersionName = "0.3.$gitCommitCount"
+
+// Ключ подписи для CI: если задан (из секретов GitHub) — подписываем им, иначе общим debug.keystore.
+val ciKeystorePath: String? = System.getenv("SIGNING_KEYSTORE_PATH")
+val ciKeystorePassword: String? = System.getenv("SIGNING_PASSWORD")
+
 android {
     namespace = "ru.limonella.alias"
     compileSdk = 35
@@ -13,8 +25,8 @@ android {
         applicationId = "ru.limonella.alias"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
     }
 
     // Общий debug-ключ в репозитории: APK из GitHub и из Android Studio подписаны одинаково,
@@ -26,9 +38,20 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        if (ciKeystorePath != null) {
+            create("ci") {
+                storeFile = file(ciKeystorePath)
+                storePassword = ciKeystorePassword
+                keyAlias = "alias"
+                keyPassword = ciKeystorePassword
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            if (ciKeystorePath != null) signingConfig = signingConfigs.getByName("ci")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -49,7 +72,13 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+}
+
+// Для CI: печатает "versionCode|versionName", чтобы записать их в version.json.
+tasks.register("printVersion") {
+    doLast { println("$appVersionCode|$appVersionName") }
 }
 
 dependencies {

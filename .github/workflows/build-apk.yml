@@ -1,5 +1,5 @@
 # Автосборка: после каждого push в main собирает APK и выкладывает его
-# в релиз «latest» — оттуда его можно скачать прямо на телефон.
+# в релиз «latest» вместе с version.json — по нему приложение проверяет обновления.
 name: Build APK
 
 on:
@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # нужна вся история: номер версии = число коммитов
 
       - uses: actions/setup-java@v4
         with:
@@ -27,26 +29,51 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Ключ подписи из секретов (если задан)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            echo "SIGNING_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+            echo "Подпись: ключ из секретов"
+          else
+            echo "Подпись: общий debug.keystore из репозитория"
+          fi
+
       - name: Unit-тесты
         run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Сборка APK
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Подготовка файла
-        run: cp app/build/outputs/apk/debug/app-debug.apk alias.apk
+      - name: Подготовка файлов
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk alias.apk
+          VERSION=$(./gradlew -q printVersion | tail -1)
+          jq -n \
+            --argjson code "${VERSION%%|*}" \
+            --arg name "${VERSION#*|}" \
+            --arg url "https://github.com/${{ github.repository }}/releases/download/latest/alias.apk" \
+            --arg notes "$(git log -1 --pretty=%s)" \
+            '{versionCode: $code, versionName: $name, apkUrl: $url, notes: $notes}' > version.json
+          cat version.json
 
       - uses: actions/upload-artifact@v4
         with:
           name: alias-apk
-          path: alias.apk
+          path: |
+            alias.apk
+            version.json
 
       - name: Публикация в релиз latest
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest alias.apk \
+          gh release create latest alias.apk version.json \
             --target "${{ github.sha }}" \
             --prerelease \
             --title "Последняя сборка #${{ github.run_number }}" \

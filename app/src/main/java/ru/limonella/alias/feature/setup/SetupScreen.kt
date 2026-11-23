@@ -42,10 +42,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.compose.material3.Card
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,11 +60,9 @@ import ru.limonella.alias.ui.components.PackCover
 fun SetupScreen(
     onBack: () -> Unit,
     onStartGame: () -> Unit,
+    onOpenThemes: () -> Unit,
 ) {
-    val container = appContainer()
-    val viewModel: SetupViewModel = viewModel {
-        SetupViewModel(container.gameSessionStore, container.wordRepository)
-    }
+    val viewModel = setupViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -127,15 +127,10 @@ fun SetupScreen(
 
             item { SectionTitle("Темы") }
             item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(state.packs, key = { it.id }) { pack ->
-                        PackCard(
-                            pack = pack,
-                            selected = pack.id in state.selectedPackIds,
-                            onClick = { viewModel.togglePack(pack.id) },
-                        )
-                    }
-                }
+                ThemesSummary(
+                    selected = state.packs.filter { it.id in state.selectedPackIds },
+                    onClick = onOpenThemes,
+                )
             }
 
             item { SectionTitle("Время раунда") }
@@ -220,6 +215,60 @@ fun SetupScreen(
     }
 }
 
+/** Один SetupViewModel на экран настроек и экран тем: [owner] — запись экрана настроек. */
+@Composable
+fun setupViewModel(
+    owner: ViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current),
+): SetupViewModel {
+    val container = appContainer()
+    return viewModel(viewModelStoreOwner = owner) {
+        SetupViewModel(container.gameSessionStore, container.wordRepository)
+    }
+}
+
+/** Карточка «Темы»: что выбрано, по нажатию — экран с плитками. */
+@Composable
+private fun ThemesSummary(selected: List<WordPack>, onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Обложки внахлёст: каждая следующая сдвинута вправо.
+            Box {
+                selected.take(3).forEachIndexed { index, pack ->
+                    PackCover(
+                        pack = pack,
+                        modifier = Modifier
+                            .padding(start = (index * 28).dp)
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                    )
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = if (selected.isEmpty()) "Темы не выбраны" else selected.joinToString { it.title },
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    "Нажмите, чтобы выбрать темы",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+        }
+    }
+}
+
 private fun lastWordName(rule: LastWordRule): String = when (rule) {
     LastWordRule.NONE -> "Сгорает"
     LastWordRule.ANY_TEAM -> "Любая команда"
@@ -230,49 +279,6 @@ private fun lastWordDescription(rule: LastWordRule): String = when (rule) {
     LastWordRule.NONE -> "Время вышло — слово не засчитывается, раунд сразу заканчивается."
     LastWordRule.ANY_TEAM -> "После сигнала слово может отгадать любая команда, очко — тому, кто первым угадал."
     LastWordRule.OWN_TEAM -> "После сигнала объясняющий договаривает слово без ограничения времени, отгадывает только своя команда."
-}
-
-@Composable
-private fun PackCard(pack: WordPack, selected: Boolean, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.width(150.dp),
-        shape = RoundedCornerShape(20.dp),
-        border = if (selected) BorderStroke(3.dp, MaterialTheme.colorScheme.primary) else null,
-    ) {
-        Box {
-            PackCover(
-                pack = pack,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(90.dp),
-            )
-            if (selected) {
-                Icon(
-                    Icons.Filled.CheckCircle,
-                    contentDescription = "Выбрано",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp),
-                )
-            }
-        }
-        Column(Modifier.padding(12.dp)) {
-            Text(
-                pack.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                "${pack.totalWords} слов",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
 }
 
 private fun levelName(level: Int): String = when (level) {

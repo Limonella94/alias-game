@@ -110,6 +110,10 @@ class SetupViewModel(
         )
     }
 
+    fun selectAllPacks() = _state.update { s -> s.copy(selectedPackIds = s.packs.map { it.id }.toSet()) }
+
+    fun clearPacks() = _state.update { it.copy(selectedPackIds = emptySet()) }
+
     /** Сохраняет настройки для экрана игры. Возвращает false, если настройки неполные. */
     fun saveConfig(): Boolean {
         val s = _state.value

@@ -8,6 +8,7 @@ import ru.limonella.alias.AliasApp
 import ru.limonella.alias.core.sound.SoundPlayer
 import ru.limonella.alias.data.session.GameSessionStore
 import ru.limonella.alias.data.sound.SoundPoolPlayer
+import ru.limonella.alias.data.update.UpdateManager
 import ru.limonella.alias.data.words.AssetWordRepository
 import ru.limonella.alias.data.words.WordRepository
 
@@ -25,6 +26,8 @@ class AppContainer(context: Context) {
     val gameSessionStore: GameSessionStore by lazy { GameSessionStore() }
 
     val soundPlayer: SoundPlayer by lazy { SoundPoolPlayer(appContext) }
+
+    val updateManager: UpdateManager by lazy { UpdateManager(appContext, json) }
 }
 
 /** Достать контейнер из любого экрана. */
