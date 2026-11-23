@@ -7,7 +7,7 @@
   "audience": "adult",
   "emoji": "⚔️",
   "color": "#374151",
-  "cover": null,
+  "cover": "covers/ru_witcher.webp",
   "order": 20,
   "words": [
     {"id": "ru_witcher_0001", "text": "Геральт", "level": 1, "categories": [], "ageMin": 16},
