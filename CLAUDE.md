@@ -15,6 +15,7 @@ Android-игра Alias на Kotlin + Jetpack Compose. Владелец прое�
   и выкладывает его в релиз `latest` (`releases/download/latest/alias.apk`). После push проверять
   результат: `gh api repos/Limonella94/alias-game/actions/runs?per_page=1`, логи ошибок —
   `gh api repos/Limonella94/alias-game/actions/jobs/<job_id>/logs`. Push считается готовым, только когда сборка зелёная.
+  Релиз `latest` НЕ пересоздавать (удаление тега делает новый релиз черновиком) — только `gh release upload --clobber`.
 - В KDoc/комментариях не писать `/*` внутри текста (например, `words/*.json`) — Kotlin считает это вложенным комментарием.
 - **Подпись:** если в секретах репозитория есть `SIGNING_KEYSTORE_BASE64` + `SIGNING_PASSWORD` (alias `alias`),
   CI подписывает ими; иначе — общим `app/debug.keystore`. Ключ из секретов есть только у владельца; при его появлении
