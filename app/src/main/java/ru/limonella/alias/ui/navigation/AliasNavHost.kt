@@ -48,6 +48,12 @@ fun AliasNavHost(navController: NavHostController = rememberNavController()) {
             GameScreen(
                 onExitToMenu = { navController.popBackStack(route = HomeRoute, inclusive = false) },
                 onNewGame = { navController.popBackStack(route = SetupRoute, inclusive = false) },
+                // Те же настройки уже лежат в GameSessionStore — просто открываем игру заново.
+                onRematch = {
+                    navController.navigate(GameRoute) {
+                        popUpTo<GameRoute> { inclusive = true }
+                    }
+                },
             )
         }
         composable<KidsRoute> {

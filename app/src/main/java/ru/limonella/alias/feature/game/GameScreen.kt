@@ -30,6 +30,7 @@ import ru.limonella.alias.di.appContainer
 fun GameScreen(
     onExitToMenu: () -> Unit,
     onNewGame: () -> Unit,
+    onRematch: () -> Unit,
 ) {
     val container = appContainer()
     val viewModel: GameViewModel = viewModel {
@@ -94,7 +95,12 @@ fun GameScreen(
                     onConfirm = viewModel::confirmRound,
                 )
 
-                Phase.FINISHED -> FinishedContent(game = game, onNewGame = onNewGame, onMenu = onExitToMenu)
+                Phase.FINISHED -> FinishedContent(
+                    game = game,
+                    onRematch = onRematch,
+                    onNewGame = onNewGame,
+                    onMenu = onExitToMenu,
+                )
             }
         }
     }

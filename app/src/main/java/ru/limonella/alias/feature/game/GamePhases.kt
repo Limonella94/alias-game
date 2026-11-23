@@ -367,7 +367,12 @@ private fun LastWordPicker(word: Word, game: GameState, onSelect: (Int?) -> Unit
 }
 
 @Composable
-internal fun FinishedContent(game: GameState, onNewGame: () -> Unit, onMenu: () -> Unit) {
+internal fun FinishedContent(
+    game: GameState,
+    onRematch: () -> Unit,
+    onNewGame: () -> Unit,
+    onMenu: () -> Unit,
+) {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(24.dp))
         Text("🏆", style = MaterialTheme.typography.displayLarge)
@@ -381,7 +386,14 @@ internal fun FinishedContent(game: GameState, onNewGame: () -> Unit, onMenu: () 
         Spacer(Modifier.height(24.dp))
         ScoreBoard(game, highlightTeamId = game.winners.firstOrNull()?.id, modifier = Modifier.weight(1f))
         Spacer(Modifier.height(16.dp))
-        BigButton("Новая игра", onNewGame)
+        BigButton("Реванш", onRematch)
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = onNewGame,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+        ) { Text("Новая игра (другие настройки)") }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = onMenu,
