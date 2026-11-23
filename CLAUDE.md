@@ -16,7 +16,13 @@ Android-игра Alias на Kotlin + Jetpack Compose. Владелец прое�
   результат: `gh api repos/Limonella94/alias-game/actions/runs?per_page=1`, логи ошибок —
   `gh api repos/Limonella94/alias-game/actions/jobs/<job_id>/logs`. Push считается готовым, только когда сборка зелёная.
 - В KDoc/комментариях не писать `/*` внутри текста (например, `words/*.json`) — Kotlin считает это вложенным комментарием.
-- APK подписывается общим `app/debug.keystore` (в репозитории), чтобы сборки CI и Android Studio ставились поверх друг друга.
+- **Подпись:** если в секретах репозитория есть `SIGNING_KEYSTORE_BASE64` + `SIGNING_PASSWORD` (alias `alias`),
+  CI подписывает ими; иначе — общим `app/debug.keystore`. Ключ из секретов есть только у владельца; при его появлении
+  APK из CI и из Android Studio подписаны по-разному (ставить поверх друг друга нельзя).
+- **Обновления в приложении:** `data/update/UpdateManager` читает `releases/download/latest/version.json`
+  (кладёт CI), сравнивает `versionCode` с `BuildConfig.VERSION_CODE`, качает APK в cache и открывает установщик.
+  Работает только при публичном репозитории. `versionCode` = число коммитов (`git rev-list --count HEAD`),
+  поэтому в CI нужен `fetch-depth: 0`.
 
 ## Архитектура
 
