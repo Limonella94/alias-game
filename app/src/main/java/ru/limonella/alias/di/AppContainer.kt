@@ -5,7 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.serialization.json.Json
 import ru.limonella.alias.AliasApp
+import ru.limonella.alias.core.sound.SoundPlayer
 import ru.limonella.alias.data.session.GameSessionStore
+import ru.limonella.alias.data.sound.SoundPoolPlayer
 import ru.limonella.alias.data.words.AssetWordRepository
 import ru.limonella.alias.data.words.WordRepository
 
@@ -21,6 +23,8 @@ class AppContainer(context: Context) {
     val wordRepository: WordRepository by lazy { AssetWordRepository(appContext, json) }
 
     val gameSessionStore: GameSessionStore by lazy { GameSessionStore() }
+
+    val soundPlayer: SoundPlayer by lazy { SoundPoolPlayer(appContext) }
 }
 
 /** Достать контейнер из любого экрана. */

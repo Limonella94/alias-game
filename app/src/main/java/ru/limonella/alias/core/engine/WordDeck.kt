@@ -11,7 +11,8 @@ class WordDeck(
     words: List<Word>,
     private val random: Random = Random.Default,
 ) {
-    private val all: List<Word> = words.distinctBy { it.id }
+    // Одно и то же слово может быть в нескольких темах — в колоде оставляем один экземпляр.
+    private val all: List<Word> = words.distinctBy { it.text.trim().lowercase() }
     private val queue = ArrayDeque<Word>()
 
     init {

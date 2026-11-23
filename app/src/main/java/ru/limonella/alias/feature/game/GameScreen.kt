@@ -33,7 +33,7 @@ fun GameScreen(
 ) {
     val container = appContainer()
     val viewModel: GameViewModel = viewModel {
-        GameViewModel(container.gameSessionStore, container.wordRepository)
+        GameViewModel(container.gameSessionStore, container.wordRepository, container.soundPlayer)
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     var showExitDialog by remember { mutableStateOf(false) }

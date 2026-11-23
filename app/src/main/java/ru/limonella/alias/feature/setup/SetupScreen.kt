@@ -38,6 +38,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.limonella.alias.di.appContainer
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Card
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import ru.limonella.alias.core.model.LastWordRule
+import ru.limonella.alias.core.model.WordPack
+import ru.limonella.alias.ui.components.PackCover
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +60,9 @@ fun SetupScreen(
     onStartGame: () -> Unit,
 ) {
     val container = appContainer()
-    val viewModel: SetupViewModel = viewModel { SetupViewModel(container.gameSessionStore) }
+    val viewModel: SetupViewModel = viewModel {
+        SetupViewModel(container.gameSessionStore, container.wordRepository)
+    }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -109,6 +125,19 @@ fun SetupScreen(
                 }
             }
 
+            item { SectionTitle("Темы") }
+            item {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(state.packs, key = { it.id }) { pack ->
+                        PackCard(
+                            pack = pack,
+                            selected = pack.id in state.selectedPackIds,
+                            onClick = { viewModel.togglePack(pack.id) },
+                        )
+                    }
+                }
+            }
+
             item { SectionTitle("Время раунда") }
             item {
                 ChipRow(
@@ -138,6 +167,21 @@ fun SetupScreen(
                     onClick = viewModel::toggleLevel,
                 )
             }
+            item {
+                Text(
+                    text = if (state.wordsInGame > 0) {
+                        "Слов в игре: ${state.wordsInGame}"
+                    } else {
+                        "Выберите хотя бы одну тему и сложность"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (state.wordsInGame > 0) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                )
+            }
 
             item { SectionTitle("Правила") }
             item {
@@ -147,13 +191,86 @@ fun SetupScreen(
                     onCheckedChange = viewModel::setSkipPenalty,
                 )
             }
+            item { SectionTitle("Последнее слово") }
             item {
-                SwitchRow(
-                    text = "Последнее слово может отгадать любая команда",
-                    checked = state.lastWordForAll,
-                    onCheckedChange = viewModel::setLastWordForAll,
+                ChipRow(
+                    options = SetupUiState.LAST_WORD_OPTIONS,
+                    isSelected = { it == state.lastWord },
+                    label = ::lastWordName,
+                    onClick = viewModel::setLastWord,
                 )
             }
+            item {
+                Text(
+                    lastWordDescription(state.lastWord),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            item { SectionTitle("Прочее") }
+            item {
+                SwitchRow(
+                    text = "Звуки",
+                    checked = state.soundEnabled,
+                    onCheckedChange = viewModel::setSoundEnabled,
+                )
+            }
+        }
+    }
+}
+
+private fun lastWordName(rule: LastWordRule): String = when (rule) {
+    LastWordRule.NONE -> "Сгорает"
+    LastWordRule.ANY_TEAM -> "Любая команда"
+    LastWordRule.OWN_TEAM -> "Своя команда"
+}
+
+private fun lastWordDescription(rule: LastWordRule): String = when (rule) {
+    LastWordRule.NONE -> "Время вышло — слово не засчитывается, раунд сразу заканчивается."
+    LastWordRule.ANY_TEAM -> "После сигнала слово может отгадать любая команда, очко — тому, кто первым угадал."
+    LastWordRule.OWN_TEAM -> "После сигнала объясняющий договаривает слово без ограничения времени, отгадывает только своя команда."
+}
+
+@Composable
+private fun PackCard(pack: WordPack, selected: Boolean, onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.width(150.dp),
+        shape = RoundedCornerShape(20.dp),
+        border = if (selected) BorderStroke(3.dp, MaterialTheme.colorScheme.primary) else null,
+    ) {
+        Box {
+            PackCover(
+                pack = pack,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(90.dp),
+            )
+            if (selected) {
+                Icon(
+                    Icons.Filled.CheckCircle,
+                    contentDescription = "Выбрано",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp),
+                )
+            }
+        }
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                pack.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                "${pack.totalWords} слов",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -182,7 +299,10 @@ private fun <T> ChipRow(
     label: (T) -> String,
     onClick: (T) -> Unit,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         options.forEach { option ->
             FilterChip(
                 selected = isSelected(option),

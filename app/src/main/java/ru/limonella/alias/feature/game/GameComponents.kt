@@ -35,32 +35,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ru.limonella.alias.core.engine.GameState
+import ru.limonella.alias.ui.components.WordText
 import kotlin.math.roundToInt
-
-@Composable
-internal fun BigButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.primary,
-    contentColor: Color = MaterialTheme.colorScheme.onPrimary,
-    enabled: Boolean = true,
-) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(64.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = contentColor,
-        ),
-    ) {
-        Text(text, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-    }
-}
 
 /** Таблица счёта. [highlightTeamId] — чью строку подсветить. */
 @Composable
@@ -160,21 +136,6 @@ internal fun SwipeableWordCard(
             WordText(text)
         }
     }
-}
-
-/** Крупный текст слова; длинные слова — чуть мельче, чтобы не переносились. */
-@Composable
-internal fun WordText(text: String) {
-    Text(
-        text = text,
-        style = if (text.length > 10) {
-            MaterialTheme.typography.headlineLarge
-        } else {
-            MaterialTheme.typography.displaySmall
-        },
-        fontWeight = FontWeight.Bold,
-        textAlign = TextAlign.Center,
-    )
 }
 
 internal fun formatSeconds(seconds: Int): String =

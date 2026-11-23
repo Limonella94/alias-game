@@ -14,6 +14,8 @@ import ru.limonella.alias.core.engine.GameEngine
 import ru.limonella.alias.core.engine.GameState
 import ru.limonella.alias.core.engine.Phase
 import ru.limonella.alias.core.engine.WordDeck
+import ru.limonella.alias.core.sound.GameSound
+import ru.limonella.alias.core.sound.SoundPlayer
 import ru.limonella.alias.data.session.GameSessionStore
 import ru.limonella.alias.data.words.WordRepository
 
@@ -24,6 +26,7 @@ import ru.limonella.alias.data.words.WordRepository
 class GameViewModel(
     private val sessionStore: GameSessionStore,
     private val wordRepository: WordRepository,
+    private val soundPlayer: SoundPlayer,
 ) : ViewModel() {
 
     data class UiState(
@@ -38,6 +41,7 @@ class GameViewModel(
     val ui: StateFlow<UiState> = _ui.asStateFlow()
 
     private var engine: GameEngine? = null
+    private var soundEnabled = true
     private var timerJob: Job? = null
 
     init {
@@ -62,6 +66,7 @@ class GameViewModel(
             _ui.update { it.copy(error = "Нет слов для выбранной сложности") }
             return
         }
+        soundEnabled = config.soundEnabled
         engine = GameEngine(config, WordDeck(words))
         publish()
     }
@@ -75,14 +80,16 @@ class GameViewModel(
     }
 
     fun markGuessed() {
-        if (_ui.value.paused) return
+        if (_ui.value.paused || !isPhase(Phase.PLAYING)) return
         engine?.markGuessed()
+        sound(GameSound.GUESSED)
         publish()
     }
 
     fun markSkipped() {
-        if (_ui.value.paused) return
+        if (_ui.value.paused || !isPhase(Phase.PLAYING)) return
         engine?.markSkipped()
+        sound(GameSound.SKIPPED)
         publish()
     }
 
@@ -101,7 +108,11 @@ class GameViewModel(
     }
 
     fun resolveLastWord(teamId: Int?) {
+        if (!isPhase(Phase.LAST_WORD)) return
         engine?.resolveLastWord(teamId)
+        if (!isPhase(Phase.LAST_WORD)) {
+            sound(if (teamId != null) GameSound.GUESSED else GameSound.SKIPPED)
+        }
         publish()
     }
 
@@ -131,11 +142,19 @@ class GameViewModel(
                 if (!_ui.value.paused) {
                     left--
                     _ui.update { it.copy(secondsLeft = left) }
+                    if (left in 1..3) sound(GameSound.TICK)
                 }
             }
+            sound(GameSound.TIME_UP)
             engine?.timeUp()
             publish()
         }
+    }
+
+    private fun isPhase(phase: Phase): Boolean = engine?.state?.phase == phase
+
+    private fun sound(sound: GameSound) {
+        if (soundEnabled) soundPlayer.play(sound)
     }
 
     private fun publish() {

@@ -1,6 +1,7 @@
 package ru.limonella.alias.core.engine
 
 import ru.limonella.alias.core.model.GameConfig
+import ru.limonella.alias.core.model.LastWordRule
 import ru.limonella.alias.core.model.Team
 
 /**
@@ -51,17 +52,20 @@ class GameEngine(
     fun timeUp() {
         val s = state
         if (s.phase != Phase.PLAYING) return
-        state = if (s.config.rules.lastWordForAll && s.currentWord != null) {
+        state = if (s.config.rules.lastWord != LastWordRule.NONE && s.currentWord != null) {
             s.copy(phase = Phase.LAST_WORD)
         } else {
             s.copy(phase = Phase.REVIEW, currentWord = null)
         }
     }
 
-    /** Кто отгадал последнее слово: id команды или null — никто. */
+    /**
+     * Кто отгадал последнее слово: id команды или null — никто.
+     * В режиме [LastWordRule.OWN_TEAM] засчитать можно только своей команде.
+     */
     fun resolveLastWord(teamId: Int?) {
         val s = state
-        if (s.phase != Phase.LAST_WORD) return
+        if (s.phase != Phase.LAST_WORD || !isAllowedLastWordTeam(s, teamId)) return
         state = s.copy(
             phase = Phase.REVIEW,
             lastWord = s.currentWord,
@@ -85,8 +89,14 @@ class GameEngine(
     /** На экране итогов: исправить, кто отгадал последнее слово. */
     fun setLastWordTeam(teamId: Int?) {
         val s = state
-        if (s.phase != Phase.REVIEW || s.lastWord == null) return
+        if (s.phase != Phase.REVIEW || s.lastWord == null || !isAllowedLastWordTeam(s, teamId)) return
         state = s.copy(lastWordTeamId = teamId)
+    }
+
+    private fun isAllowedLastWordTeam(s: GameState, teamId: Int?): Boolean = when {
+        teamId == null -> true
+        s.config.rules.lastWord == LastWordRule.OWN_TEAM -> teamId == s.currentTeam.id
+        else -> s.config.teams.any { it.id == teamId }
     }
 
     /** Подтвердить итоги раунда: начислить очки и передать ход. */

@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import ru.limonella.alias.core.model.GameConfig
+import ru.limonella.alias.core.model.LastWordRule
 import ru.limonella.alias.core.model.RuleSet
 import ru.limonella.alias.core.model.Team
 import ru.limonella.alias.core.model.Word
@@ -65,7 +66,7 @@ class GameEngineTest {
 
     @Test
     fun noLastWordModeGoesStraightToReview() {
-        val e = engine(RuleSet.Classic.copy(lastWordForAll = false))
+        val e = engine(RuleSet.Classic.copy(lastWord = LastWordRule.NONE))
         e.startRound()
         e.timeUp()
         assertEquals(Phase.REVIEW, e.state.phase)
@@ -73,7 +74,7 @@ class GameEngineTest {
 
     @Test
     fun winnerOnlyAfterFullCycle() {
-        val e = engine(RuleSet.Classic.copy(pointsToWin = 2, lastWordForAll = false))
+        val e = engine(RuleSet.Classic.copy(pointsToWin = 2, lastWord = LastWordRule.NONE))
         // Команда A набирает 2 — но B ещё не ходила.
         e.startRound(); e.markGuessed(); e.markGuessed(); e.timeUp(); e.confirmRound()
         assertEquals(Phase.READY, e.state.phase)
@@ -85,7 +86,7 @@ class GameEngineTest {
 
     @Test
     fun tieContinuesGame() {
-        val e = engine(RuleSet.Classic.copy(pointsToWin = 1, lastWordForAll = false))
+        val e = engine(RuleSet.Classic.copy(pointsToWin = 1, lastWord = LastWordRule.NONE))
         e.startRound(); e.markGuessed(); e.timeUp(); e.confirmRound()
         e.startRound(); e.markGuessed(); e.timeUp(); e.confirmRound()
         assertEquals(Phase.READY, e.state.phase)
@@ -100,5 +101,28 @@ class GameEngineTest {
         e.confirmRound()
         assertEquals(Phase.READY, e.state.phase)
         assertTrue(e.state.roundResults.isEmpty())
+    }
+
+    @Test
+    fun ownTeamLastWordRejectsOtherTeams() {
+        val e = engine(RuleSet.Classic.copy(lastWord = LastWordRule.OWN_TEAM))
+        e.startRound()
+        e.timeUp()
+        assertEquals(Phase.LAST_WORD, e.state.phase)
+        e.resolveLastWord(teamB.id) // чужая команда — не засчитывается
+        assertEquals(Phase.LAST_WORD, e.state.phase)
+        e.resolveLastWord(teamA.id)
+        e.confirmRound()
+        assertEquals(1, e.state.scores[teamA.id])
+    }
+
+    @Test
+    fun duplicateTextsAreNotRepeatedInDeck() {
+        val deck = WordDeck(
+            listOf(Word("a", "Сова", 1), Word("b", "сова", 1), Word("c", "Кот", 1)),
+            Random(1),
+        )
+        val drawn = List(2) { deck.next().text.lowercase() }.toSet()
+        assertEquals(setOf("сова", "кот"), drawn)
     }
 }

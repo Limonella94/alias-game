@@ -34,8 +34,11 @@ import ru.limonella.alias.core.engine.GameState
 import ru.limonella.alias.core.engine.Outcome
 import ru.limonella.alias.core.engine.WordResult
 import ru.limonella.alias.core.engine.pointsFor
+import ru.limonella.alias.core.model.LastWordRule
 import ru.limonella.alias.core.model.RuleSet
 import ru.limonella.alias.core.model.Word
+import ru.limonella.alias.ui.components.BigButton
+import ru.limonella.alias.ui.components.WordText
 import ru.limonella.alias.ui.theme.GameColors
 
 // Экраны для каждого этапа игры (см. Phase).
@@ -157,6 +160,72 @@ internal fun RoundContent(
 
 @Composable
 internal fun LastWordContent(game: GameState, onResolve: (Int?) -> Unit) {
+    if (game.config.rules.lastWord == LastWordRule.OWN_TEAM) {
+        OwnTeamLastWord(game, onResolve)
+    } else {
+        AnyTeamLastWord(game, onResolve)
+    }
+}
+
+/** Объясняющий договаривает слово без ограничения времени, отгадывает только своя команда. */
+@Composable
+private fun OwnTeamLastWord(game: GameState, onResolve: (Int?) -> Unit) {
+    val word = game.currentWord
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            "Время вышло!",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            color = GameColors.Skipped,
+        )
+        Text(
+            "Последнее слово — объясняй до конца, время не ограничено",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            "Отгадывает только команда «${game.currentTeam.name}»",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (word != null) {
+                SwipeableWordCard(
+                    text = word.text,
+                    wordKey = "last#" + word.id,
+                    onGuessed = { onResolve(game.currentTeam.id) },
+                    onSkipped = { onResolve(null) },
+                )
+            }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            BigButton(
+                text = "Не угадали",
+                onClick = { onResolve(null) },
+                modifier = Modifier.weight(1f),
+                containerColor = GameColors.Skipped,
+                contentColor = Color.White,
+            )
+            BigButton(
+                text = "Угадали",
+                onClick = { onResolve(game.currentTeam.id) },
+                modifier = Modifier.weight(1f),
+                containerColor = GameColors.Guessed,
+                contentColor = Color.White,
+            )
+        }
+    }
+}
+
+/** Последнее слово может отгадать любая команда. */
+@Composable
+private fun AnyTeamLastWord(game: GameState, onResolve: (Int?) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -272,8 +341,13 @@ private fun ResultRow(result: WordResult, rules: RuleSet, onClick: () -> Unit) {
 
 @Composable
 private fun LastWordPicker(word: Word, game: GameState, onSelect: (Int?) -> Unit) {
+    val teams = if (game.config.rules.lastWord == LastWordRule.OWN_TEAM) {
+        listOf(game.currentTeam)
+    } else {
+        game.config.teams
+    }
     val options: List<Pair<Int?, String>> =
-        game.config.teams.map { it.id to it.name } + listOf(null to "Никто")
+        teams.map { it.id to it.name } + listOf(null to "Никто")
     Column(
         modifier = Modifier
             .fillMaxWidth()

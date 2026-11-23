@@ -1,9 +1,14 @@
 {
   "id": "ru_base",
-  "version": 1,
+  "version": 2,
   "language": "ru",
-  "title": "Базовый набор",
+  "title": "Базовый",
+  "description": "Обычные слова на каждый день",
   "audience": "adult",
+  "emoji": "💬",
+  "color": "#6C4DFF",
+  "cover": null,
+  "order": 0,
   "words": [
     {"id": "ru_0001", "text": "Кот", "level": 1, "categories": ["animals"], "ageMin": 6},
     {"id": "ru_0002", "text": "Собака", "level": 1, "categories": ["animals"], "ageMin": 6},

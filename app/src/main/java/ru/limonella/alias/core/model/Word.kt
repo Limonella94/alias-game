@@ -7,6 +7,7 @@ package ru.limonella.alias.core.model
  * @param categories темы: "animals", "food" и т.д. Используются для фильтра.
  * @param ageMin минимальный возраст игрока, для которого слово подходит.
  * @param image ссылка/путь к картинке (для детского режима), null — без картинки.
+ * @param packId из какого набора (темы) слово.
  */
 data class Word(
     val id: String,
@@ -15,4 +16,5 @@ data class Word(
     val categories: List<String> = emptyList(),
     val ageMin: Int = 0,
     val image: String? = null,
+    val packId: String = "",
 )
