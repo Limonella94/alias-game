@@ -32,19 +32,7 @@ import ru.limonella.alias.core.model.WordPack
  */
 @Composable
 fun PackCover(pack: WordPack, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val image by produceState<ImageBitmap?>(initialValue = null, pack.cover) {
-        val path = pack.cover
-        value = if (path == null) {
-            null
-        } else {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    context.assets.open(path).use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
-                }.getOrNull()
-            }
-        }
-    }
+    val image by rememberAssetImage(pack.cover)
 
     val base = pack.colorArgb?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     Box(

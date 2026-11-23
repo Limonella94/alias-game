@@ -63,6 +63,13 @@ class WordPacksTest {
     }
 
     @Test
+    fun wordImageFilesExist() {
+        packs.flatMap { it.words }.mapNotNull { it.image }.forEach { image ->
+            assertTrue("Нет файла картинки $image", File("src/main/assets/$image").isFile)
+        }
+    }
+
+    @Test
     fun kidsPackHasPictureForEveryWord() {
         val kids = packs.single { it.id == KidsPresets.PACK_ID }
         assertEquals(WordPack.AUDIENCE_KIDS, kids.audience)

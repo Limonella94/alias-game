@@ -151,6 +151,7 @@ internal fun RoundContent(
                     onGuessed = onGuessed,
                     onSkipped = onSkipped,
                     emoji = word.emoji,
+                    image = word.image,
                 )
             }
         }
@@ -227,6 +228,7 @@ private fun OwnTeamLastWord(game: GameState, onResolve: (Int?) -> Unit) {
                     onGuessed = { onResolve(game.currentTeam.id) },
                     onSkipped = { onResolve(null) },
                     emoji = word.emoji,
+                    image = word.image,
                 )
             }
         }

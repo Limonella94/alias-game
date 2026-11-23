@@ -99,7 +99,10 @@ internal fun SwipeableWordCard(
     modifier: Modifier = Modifier,
     /** Если задан — карточка с картинкой (детский режим). */
     emoji: String? = null,
+    /** Нарисованная картинка (путь в assets) — показывается вместо эмодзи. */
+    image: String? = null,
 ) {
+    val picture = emoji != null || image != null
     val currentOnGuessed by rememberUpdatedState(onGuessed)
     val currentOnSkipped by rememberUpdatedState(onSkipped)
     var offsetY by remember(wordKey) { mutableFloatStateOf(0f) }
@@ -107,7 +110,7 @@ internal fun SwipeableWordCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(if (emoji != null) 300.dp else 240.dp)
+            .height(if (picture) 300.dp else 240.dp)
             .offset { IntOffset(0, offsetY.roundToInt()) }
             .pointerInput(wordKey) {
                 val threshold = 100.dp.toPx()
@@ -137,7 +140,7 @@ internal fun SwipeableWordCard(
                 .padding(24.dp),
             contentAlignment = Alignment.Center,
         ) {
-            if (emoji != null) WordPicture(emoji = emoji, text = text) else WordText(text)
+            if (picture) WordPicture(emoji = emoji, text = text, image = image) else WordText(text)
         }
     }
 }

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.limonella.alias.di.appContainer
+import ru.limonella.alias.core.model.Word
 import ru.limonella.alias.ui.components.WordPicture
 import ru.limonella.alias.ui.theme.GameColors
 import ru.limonella.alias.R
@@ -87,7 +88,7 @@ fun KidsLittleScreen(onExit: () -> Unit) {
 
                 ui.finished -> LittleResults(
                     guessed = ui.guessed,
-                    emojis = ui.guessedWords.mapNotNull { it.emoji },
+                    words = ui.guessedWords,
                     onAgain = viewModel::start,
                     onExit = onExit,
                 )
@@ -115,7 +116,9 @@ fun KidsLittleScreen(onExit: () -> Unit) {
                     ) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             WordPicture(
-                                emoji = word.emoji ?: "❓",
+                                emoji = word.emoji,
+                                image = word.image,
+                                imageSize = 260.dp,
                                 text = word.text,
                                 emojiSize = 160.sp,
                             )
@@ -160,7 +163,7 @@ fun KidsLittleScreen(onExit: () -> Unit) {
 @Composable
 private fun LittleResults(
     guessed: Int,
-    emojis: List<String>,
+    words: List<Word>,
     onAgain: () -> Unit,
     onExit: () -> Unit,
 ) {
@@ -184,8 +187,15 @@ private fun LittleResults(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(emojis) { emoji ->
-                Box(contentAlignment = Alignment.Center) { Text(emoji, fontSize = 44.sp) }
+            items(words) { w ->
+                WordPicture(
+                    emoji = w.emoji,
+                    text = w.text,
+                    image = w.image,
+                    emojiSize = 44.sp,
+                    imageSize = 64.dp,
+                    showCaption = false,
+                )
             }
         }
         Button(
