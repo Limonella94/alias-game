@@ -60,7 +60,7 @@ Android-игра Alias на Kotlin + Jetpack Compose. Владелец прое�
 
 ## Темы (наборы слов)
 
-- Каждая тема — отдельный JSON в `assets/words` (`ru_base`, `ru_harry_potter`, `ru_witcher`).
+- Каждая тема — отдельный JSON в `assets/words` (`ru_base`, `ru_harry_potter`, `ru_witcher`, `ru_erudite`, `ru_adults_only`, `ru_it_geeks`, `ru_movies`, `ru_90s_2000s`).
   Метаданные темы: `title`, `description`, `emoji`, `color` ("#RRGGBB"), `cover` (путь в assets), `order`.
 - Новая тема = новый JSON-файл, код менять не нужно. В колоде слова с одинаковым текстом из разных тем не дублируются.
 
