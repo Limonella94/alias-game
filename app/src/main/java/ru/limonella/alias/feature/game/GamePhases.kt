@@ -41,6 +41,9 @@ import ru.limonella.alias.core.model.Word
 import ru.limonella.alias.ui.components.BigButton
 import ru.limonella.alias.ui.components.WordText
 import ru.limonella.alias.ui.theme.GameColors
+import ru.limonella.alias.ui.theme.GlassStrong
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.graphics.lerp
 import ru.limonella.alias.ui.components.GlassCard
 import ru.limonella.alias.ui.components.GlassButton
 
@@ -330,10 +333,12 @@ internal fun ReviewContent(
 private fun ResultRow(result: WordResult, rules: RuleSet, onClick: () -> Unit) {
     val guessed = result.outcome == Outcome.GUESSED
     val color = if (guessed) GameColors.Guessed else GameColors.Skipped
+    // Плотное стекло с оттенком результата — читается даже поверх яркого фонаря на фоне.
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = color.copy(alpha = 0.15f),
+        color = lerp(GlassStrong.copy(alpha = 1f), color, 0.16f).copy(alpha = 0.92f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.35f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(

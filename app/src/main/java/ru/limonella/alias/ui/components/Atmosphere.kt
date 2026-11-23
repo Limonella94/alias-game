@@ -10,6 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.ImageShader
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.res.imageResource
+import ru.limonella.alias.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -31,9 +38,14 @@ import ru.limonella.alias.ui.theme.Graphite
 fun ScreenBackground(
     @DrawableRes image: Int,
     modifier: Modifier = Modifier,
-    scrim: Float = 0.45f,
+    scrim: Float = 0.5f,
+    grain: Boolean = true,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val grainImage = ImageBitmap.imageResource(R.drawable.grain)
+    val grainBrush = remember(grainImage) {
+        ShaderBrush(ImageShader(grainImage, TileMode.Repeated, TileMode.Repeated))
+    }
     Box(
         modifier
             .fillMaxSize()
@@ -56,6 +68,14 @@ fun ScreenBackground(
                     ),
                 ),
         )
+        // Лёгкое «плёночное зерно»: прячет мягкость картинок и добавляет фактуры.
+        if (grain) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(grainBrush),
+            )
+        }
         content()
     }
 }
