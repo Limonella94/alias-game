@@ -51,3 +51,9 @@ jobs:
             --prerelease \
             --title "Последняя сборка #${{ github.run_number }}" \
             --notes "Собрано автоматически из коммита ${{ github.sha }}"
+          # Иногда релиз остаётся черновиком — тогда ссылка на скачивание не работает. Публикуем явно.
+          for i in 1 2 3 4 5; do
+            gh release edit latest --draft=false --prerelease && break
+            sleep 5
+          done
+          test "$(gh release view latest --json isDraft --jq .isDraft)" = "false"
