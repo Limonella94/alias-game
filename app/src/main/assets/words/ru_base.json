@@ -7,7 +7,7 @@
   "audience": "adult",
   "emoji": "💬",
   "color": "#6C4DFF",
-  "cover": null,
+  "cover": "covers/ru_base.webp",
   "order": 0,
   "words": [
     {"id": "ru_0001", "text": "Кот", "level": 1, "categories": ["animals"], "ageMin": 6},

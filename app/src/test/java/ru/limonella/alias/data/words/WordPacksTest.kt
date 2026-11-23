@@ -56,6 +56,13 @@ class WordPacksTest {
     }
 
     @Test
+    fun coverFilesExist() {
+        packs.mapNotNull { it.cover }.forEach { cover ->
+            assertTrue("Нет файла обложки $cover", File("src/main/assets/$cover").isFile)
+        }
+    }
+
+    @Test
     fun kidsPackHasPictureForEveryWord() {
         val kids = packs.single { it.id == KidsPresets.PACK_ID }
         assertEquals(WordPack.AUDIENCE_KIDS, kids.audience)

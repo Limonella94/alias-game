@@ -7,7 +7,7 @@
   "audience": "adult",
   "emoji": "⚡",
   "color": "#7F1D1D",
-  "cover": null,
+  "cover": "covers/ru_harry_potter.webp",
   "order": 10,
   "words": [
     {"id": "ru_harry_potter_0001", "text": "Гарри Поттер", "level": 1, "categories": [], "ageMin": 10},
