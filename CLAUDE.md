@@ -11,6 +11,12 @@ Android-игра Alias на Kotlin + Jetpack Compose. Владелец прое�
 - `core/` — чистый Kotlin. Его можно скомпилировать и прогнать тесты без Android, компилятором из Gradle:
   `java -cp "/opt/gradle/lib/*" org.jetbrains.kotlin.cli.jvm.K2JVMCompiler ...` (+ заглушка JUnit).
 - Коммиты — небольшие, с понятным описанием на русском.
+- **CI:** `.github/workflows/build-apk.yml` после каждого push в `main` гоняет тесты, собирает APK
+  и выкладывает его в релиз `latest` (`releases/download/latest/alias.apk`). После push проверять
+  результат: `gh api repos/Limonella94/alias-game/actions/runs?per_page=1`, логи ошибок —
+  `gh api repos/Limonella94/alias-game/actions/jobs/<job_id>/logs`. Push считается готовым, только когда сборка зелёная.
+- В KDoc/комментариях не писать `/*` внутри текста (например, `words/*.json`) — Kotlin считает это вложенным комментарием.
+- APK подписывается общим `app/debug.keystore` (в репозитории), чтобы сборки CI и Android Studio ставились поверх друг друга.
 
 ## Архитектура
 
