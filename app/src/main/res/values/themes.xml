@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Основная тема задаётся в Compose (ui/theme). Эта нужна только для окна при запуске. -->
-    <style name="Theme.Alias" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Основная тема задаётся в Compose (ui/theme). Эта — только для окна при запуске: тёмная, без белой вспышки. -->
+    <style name="Theme.Alias" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 </resources>

@@ -63,18 +63,21 @@ Android-игра Alias на Kotlin + Jetpack Compose. Владелец прое�
   Метаданные темы: `title`, `description`, `emoji`, `color` ("#RRGGBB"), `cover` (путь в assets), `order`.
 - Новая тема = новый JSON-файл, код менять не нужно. В колоде слова с одинаковым текстом из разных тем не дублируются.
 
-## Этап «визуал» — где что менять
+## Визуал (стиль «мрачное фэнтези»)
 
-Весь внешний вид собран в нескольких местах, чтобы редизайн не трогал логику:
-- `ui/theme/Color.kt` — палитра (светлая/тёмная), `GameColors` — цвета «угадано/пропуск».
-- `ui/theme/Type.kt` — шрифты (сюда подключить свой шрифт из `res/font`).
-- `ui/components/` — общие элементы: `BigButton`, `WordText`, `PackCover`.
-- Обложки тем: положить картинки в `app/src/main/assets/covers/<id>.webp` и прописать `"cover": "covers/<id>.webp"`
-  в JSON темы — `PackCover` сам покажет картинку вместо эмодзи. Картинки только свои/с лицензией
-  (никакого официального арта «Гарри Поттера», «Ведьмака» и т.п.).
-- Звуки: `res/raw/sfx_guessed.wav`, `sfx_skipped.wav`, `sfx_tick.wav`, `sfx_time_up.wav` — заменить файлами с теми же именами.
-  Текущие сгенерированы синтезом (скрипт можно повторить: синус + огибающая, 22050 Гц, моно).
-- Иконка приложения: `res/drawable/ic_launcher_foreground.xml`, фон — `res/values/colors.xml`.
+Приложение всегда тёмное. Всё оформление собрано в нескольких местах:
+- `ui/theme/Color.kt` — палитра: графит (`Graphite*`), лунное серебро (`MoonSilver`), туман (`FogGray`),
+  янтарь фонаря (`Amber*`), «стекло» (`Glass`, `GlassStrong`, `GlassBorder`), `GameColors`.
+- `ui/theme/Type.kt` — `TitleFont` (заголовки, сейчас системный Serif) и `BodyFont` (сейчас SansSerif).
+  План: Playfair Display + Manrope из `res/font` — поменять только эти две переменные.
+- `ui/components/Atmosphere.kt` — `ScreenBackground` (картинка + затемнение) и `GlassCard` (матовое стекло,
+  `highlighted` = янтарная рамка). `BigButton` — янтарная кнопка со свечением, `GlassButton` — второстепенная.
+- Картинки: `res/drawable-nodpi/` — `bg_home`, `bg_game` (настройки, темы, игра), `bg_kids` (детский режим),
+  `card_play`, `card_kids` (карточки главного экрана), WebP. Иконка — `ic_launcher_foreground.webp`
+  (432 px, символ в центре) + фон `ic_launcher_background` в `values/colors.xml`.
+- Обложки тем — `assets/covers/<id>.webp` (512 px), путь в поле `cover` JSON темы. Без узнаваемых персонажей.
+- Звуки — `res/raw/sfx_*.wav`, заменить файлами с теми же именами.
+- Детские картинки к словам: промпты в `kids_prompts.csv` (у владельца), файлы `ru_kids_NNNN` → поле `image`.
 
 ## Версии
 

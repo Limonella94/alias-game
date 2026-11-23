@@ -37,6 +37,17 @@ import androidx.compose.ui.unit.sp
 import ru.limonella.alias.core.model.KidsPresets
 import ru.limonella.alias.di.appContainer
 import ru.limonella.alias.ui.components.BigButton
+import androidx.compose.material3.TopAppBarDefaults
+import ru.limonella.alias.R
+import ru.limonella.alias.ui.components.ScreenBackground
+import ru.limonella.alias.ui.components.GlassCard
+import ru.limonella.alias.ui.components.GlassButton
+import ru.limonella.alias.ui.theme.MoonSilver
+import ru.limonella.alias.ui.theme.FogGray
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
 
 /** Вход в детский режим: выбор возраста. Для деток 5–6 — ещё «все вместе» или «две команды». */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,52 +66,63 @@ fun KidsScreen(
         onStartBigGame()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Детский режим") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
-                    }
-                },
-            )
-        },
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text("Кто играет?", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-
-            AgeCard(
-                emoji = "🐣",
-                title = "Малыши 3–5",
-                description = "Взрослый объясняет картинку звуками и жестами, малыши угадывают. Без таймера.",
-                color = Color(0xFFFFC145),
-                onClick = onLittle,
-            )
-
-            AgeCard(
-                emoji = "🧒",
-                title = "Детки 5–6",
-                description = "Дети объясняют сами по картинке. Таймер 90 секунд, без штрафов.",
-                color = Color(0xFF7DD3FC),
-                onClick = { bigExpanded = !bigExpanded },
-            )
-            if (bigExpanded) {
-                Text("Как играем?", style = MaterialTheme.typography.titleLarge)
-                BigButton(text = "Все вместе", onClick = { startBig(twoTeams = false) })
-                BigButton(
-                    text = "Две команды: 🐰 и 🐻",
-                    onClick = { startBig(twoTeams = true) },
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
+    ScreenBackground(image = R.drawable.bg_kids) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    title = { Text("Детский режим") },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        }
+                    },
                 )
+            },
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.card_kids),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .clip(RoundedCornerShape(28.dp)),
+                )
+                Text("Кто играет?", style = MaterialTheme.typography.headlineMedium, color = MoonSilver)
+
+                AgeCard(
+                    emoji = "🐣",
+                    title = "Малыши 3–5",
+                    description = "Взрослый объясняет картинку звуками и жестами, малыши угадывают. Без таймера.",
+                    color = Color(0xFFFFC145),
+                    onClick = onLittle,
+                )
+
+                AgeCard(
+                    emoji = "🧒",
+                    title = "Детки 5–6",
+                    description = "Дети объясняют сами по картинке. Таймер 90 секунд, без штрафов.",
+                    color = Color(0xFF7DD3FC),
+                    onClick = { bigExpanded = !bigExpanded },
+                )
+                if (bigExpanded) {
+                    Text("Как играем?", style = MaterialTheme.typography.titleLarge)
+                    BigButton(text = "Все вместе", onClick = { startBig(twoTeams = false) })
+                    GlassButton(
+                        text = "Две команды: 🐰 и 🐻",
+                        onClick = { startBig(twoTeams = true) },
+                    )
+                }
             }
         }
     }
@@ -114,11 +136,11 @@ private fun AgeCard(
     color: Color,
     onClick: () -> Unit,
 ) {
-    Card(
+    GlassCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = color, contentColor = Color(0xFF1B1530)),
+        color = color.copy(alpha = 0.22f),
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -127,9 +149,9 @@ private fun AgeCard(
             Text(emoji, fontSize = 56.sp)
             Spacer(Modifier.width(16.dp))
             Column {
-                Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(title, style = MaterialTheme.typography.headlineSmall, color = MoonSilver)
                 Spacer(Modifier.height(4.dp))
-                Text(description, style = MaterialTheme.typography.bodyMedium)
+                Text(description, style = MaterialTheme.typography.bodyMedium, color = FogGray)
             }
         }
     }

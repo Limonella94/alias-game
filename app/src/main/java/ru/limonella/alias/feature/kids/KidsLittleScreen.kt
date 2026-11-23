@@ -41,6 +41,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.limonella.alias.di.appContainer
 import ru.limonella.alias.ui.components.WordPicture
 import ru.limonella.alias.ui.theme.GameColors
+import ru.limonella.alias.R
+import ru.limonella.alias.ui.components.ScreenBackground
+import ru.limonella.alias.ui.theme.GlassStrong
+import ru.limonella.alias.ui.theme.GlassBorder
+import androidx.compose.foundation.BorderStroke
 
 /**
  * «Малыши 3–5»: взрослый держит телефон, видит картинку и подпись,
@@ -62,88 +67,90 @@ fun KidsLittleScreen(onExit: () -> Unit) {
         onDispose { view.keepScreenOn = false }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .padding(20.dp),
-    ) {
-        val error = ui.error
-        val word = ui.word
-        when {
-            error != null -> Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(error, textAlign = TextAlign.Center)
-                TextButton(onClick = onExit) { Text("Назад") }
-            }
-
-            ui.finished -> LittleResults(
-                guessed = ui.guessed,
-                emojis = ui.guessedWords.mapNotNull { it.emoji },
-                onAgain = viewModel::start,
-                onExit = onExit,
-            )
-
-            word == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-
-            else -> Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        "⭐ ${ui.guessed}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TextButton(onClick = viewModel::finish) { Text("Закончить") }
-                }
-                Card(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    shape = RoundedCornerShape(40.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+    ScreenBackground(image = R.drawable.bg_kids) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .padding(20.dp),
+        ) {
+            val error = ui.error
+            val word = ui.word
+            when {
+                error != null -> Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        WordPicture(
-                            emoji = word.emoji ?: "❓",
-                            text = word.text,
-                            emojiSize = 160.sp,
-                        )
-                    }
+                    Text(error, textAlign = TextAlign.Center)
+                    TextButton(onClick = onExit) { Text("Назад") }
                 }
-                Text(
-                    "Покажи звуками и жестами — не называя слово!",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
+
+                ui.finished -> LittleResults(
+                    guessed = ui.guessed,
+                    emojis = ui.guessedWords.mapNotNull { it.emoji },
+                    onAgain = viewModel::start,
+                    onExit = onExit,
                 )
-                Spacer(Modifier.height(12.dp))
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.guessed()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(96.dp),
-                    shape = RoundedCornerShape(32.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = GameColors.Guessed, contentColor = Color.White),
-                ) {
-                    Text("Угадали! 🎉", fontSize = 32.sp, fontWeight = FontWeight.Black)
-                }
-                Spacer(Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = viewModel::next,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp),
-                    shape = RoundedCornerShape(24.dp),
-                ) {
-                    Text("Дальше ➡️", fontSize = 22.sp)
+
+                word == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+
+                else -> Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "⭐ ${ui.guessed}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = viewModel::finish) { Text("Закончить") }
+                    }
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        shape = RoundedCornerShape(40.dp),
+                        colors = CardDefaults.cardColors(containerColor = GlassStrong),
+                        border = BorderStroke(1.dp, GlassBorder),
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            WordPicture(
+                                emoji = word.emoji ?: "❓",
+                                text = word.text,
+                                emojiSize = 160.sp,
+                            )
+                        }
+                    }
+                    Text(
+                        "Покажи звуками и жестами — не называя слово!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.guessed()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(96.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = GameColors.Guessed, contentColor = Color.White),
+                    ) {
+                        Text("Угадали! 🎉", fontSize = 32.sp, fontWeight = FontWeight.Black)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = viewModel::next,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp),
+                        shape = RoundedCornerShape(24.dp),
+                    ) {
+                        Text("Дальше ➡️", fontSize = 22.sp)
+                    }
                 }
             }
         }

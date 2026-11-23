@@ -2,21 +2,31 @@ package ru.limonella.alias.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Временная палитра. Когда будут референсы дизайна — меняем только этот файл.
-val Grape = Color(0xFF6C4DFF)
-val GrapeLight = Color(0xFFB9A8FF)
-val GrapeContainer = Color(0xFFE6E0FF)
-val GrapeContainerDark = Color(0xFF3A2D7A)
-val Coral = Color(0xFFFF6B6B)
-val Sun = Color(0xFFFFC145)
-val Ink = Color(0xFF1B1530)
-val Paper = Color(0xFFFAF8FF)
-val Night = Color(0xFF120E22)
-val NightSurface = Color(0xFF1E1836)
-val Mist = Color(0xFFEDEAF7)
+// Стиль «мрачное фэнтези»: графит, лунное серебро, туман и тёплый янтарь фонаря.
+// Меняем вид всего приложения здесь.
 
-/** Цвета игровых действий — одинаковые в светлой и тёмной теме. */
+/** Фон: графит. */
+val Graphite = Color(0xFF121417)
+val GraphiteRaised = Color(0xFF1C1F24)
+val GraphiteHigh = Color(0xFF2A2E35)
+
+/** Текст: лунное серебро и туманный серый. */
+val MoonSilver = Color(0xFFD9DEE5)
+val FogGray = Color(0xFF9AA3AE)
+
+/** Акцент: янтарь фонаря. */
+val Amber = Color(0xFFF2A541)
+val AmberLight = Color(0xFFF7C77A)
+val AmberDeep = Color(0xFFC97E1E)
+val AmberInk = Color(0xFF1B1305)
+
+/** «Матовое стекло» карточек поверх фона. */
+val Glass = Color(0xFF1C1F24).copy(alpha = 0.78f)
+val GlassStrong = Color(0xFF16181C).copy(alpha = 0.90f)
+val GlassBorder = Color.White.copy(alpha = 0.12f)
+
+/** Цвета игровых действий. */
 object GameColors {
-    val Guessed = Color(0xFF2EB872)
-    val Skipped = Color(0xFFE5484D)
+    val Guessed = Color(0xFF4CAF7A)
+    val Skipped = Color(0xFFE05A47)
 }

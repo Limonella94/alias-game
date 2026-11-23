@@ -43,6 +43,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.limonella.alias.core.model.WordPack
 import ru.limonella.alias.feature.setup.setupViewModel
 import ru.limonella.alias.ui.components.PackCover
+import androidx.compose.material3.TopAppBarDefaults
+import ru.limonella.alias.R
+import ru.limonella.alias.ui.components.ScreenBackground
+import ru.limonella.alias.ui.components.BigButton
 
 /**
  * Выбор тем плитками. Использует тот же SetupViewModel, что и экран настроек
@@ -58,54 +62,51 @@ fun ThemesScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val allSelected = state.packs.isNotEmpty() && state.packs.all { it.id in state.selectedPackIds }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Темы") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
-                    }
-                },
-                actions = {
-                    TextButton(onClick = { if (allSelected) viewModel.clearPacks() else viewModel.selectAllPacks() }) {
-                        Text(if (allSelected) "Снять все" else "Выбрать все")
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            Button(
-                onClick = onBack,
-                shape = RoundedCornerShape(20.dp),
+    ScreenBackground(image = R.drawable.bg_game) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    title = { Text("Темы") },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        }
+                    },
+                    actions = {
+                        TextButton(onClick = { if (allSelected) viewModel.clearPacks() else viewModel.selectAllPacks() }) {
+                            Text(if (allSelected) "Снять все" else "Выбрать все")
+                        }
+                    },
+                )
+            },
+            bottomBar = {
+                BigButton(
+                    text = "Готово · ${state.selectedPackIds.size} тем, ${state.wordsInGame} слов",
+                    onClick = onBack,
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(16.dp),
+                )
+            },
+        ) { padding ->
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 150.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(16.dp)
-                    .height(60.dp),
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(
-                    "Готово · ${state.selectedPackIds.size} тем, ${state.wordsInGame} слов",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
-        },
-    ) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 150.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(state.packs, key = { it.id }) { pack ->
-                ThemeTile(
-                    pack = pack,
-                    selected = pack.id in state.selectedPackIds,
-                    onClick = { viewModel.togglePack(pack.id) },
-                )
+                items(state.packs, key = { it.id }) { pack ->
+                    ThemeTile(
+                        pack = pack,
+                        selected = pack.id in state.selectedPackIds,
+                        onClick = { viewModel.togglePack(pack.id) },
+                    )
+                }
             }
         }
     }

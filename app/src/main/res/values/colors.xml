@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#6C4DFF</color>
+    <!-- Фон иконки — тот же графит, что и на картинке иконки. -->
+    <color name="ic_launcher_background">#121417</color>
+    <color name="window_background">#121417</color>
 </resources>

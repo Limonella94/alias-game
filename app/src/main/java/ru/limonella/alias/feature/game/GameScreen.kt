@@ -27,6 +27,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.limonella.alias.core.engine.Phase
 import ru.limonella.alias.di.appContainer
+import ru.limonella.alias.R
+import ru.limonella.alias.ui.components.ScreenBackground
+import ru.limonella.alias.core.model.GameMode
 
 @Composable
 fun GameScreen(
@@ -71,59 +74,62 @@ fun GameScreen(
         )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .padding(20.dp),
-    ) {
-        val error = ui.error
-        val game = ui.game
-        when {
-            error != null -> MessageContent(message = error, buttonText = "В меню", onClick = onExitToMenu)
+    val background = if (ui.game?.config?.mode == GameMode.KIDS) R.drawable.bg_kids else R.drawable.bg_game
+    ScreenBackground(image = background) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .padding(20.dp),
+        ) {
+            val error = ui.error
+            val game = ui.game
+            when {
+                error != null -> MessageContent(message = error, buttonText = "В меню", onClick = onExitToMenu)
 
-            game == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                game == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
 
-            else -> when (game.phase) {
-                Phase.READY -> ReadyContent(game = game, onStart = viewModel::startRound)
+                else -> when (game.phase) {
+                    Phase.READY -> ReadyContent(game = game, onStart = viewModel::startRound)
 
-                Phase.PLAYING -> RoundContent(
-                    game = game,
-                    secondsLeft = ui.secondsLeft,
-                    paused = ui.paused,
-                    onGuessed = {
-                        vibrate()
-                        viewModel.markGuessed()
-                    },
-                    onSkipped = {
-                        vibrate()
-                        viewModel.markSkipped()
-                    },
-                    onTogglePause = viewModel::togglePause,
-                    onFinishRound = viewModel::finishRound,
-                )
+                    Phase.PLAYING -> RoundContent(
+                        game = game,
+                        secondsLeft = ui.secondsLeft,
+                        paused = ui.paused,
+                        onGuessed = {
+                            vibrate()
+                            viewModel.markGuessed()
+                        },
+                        onSkipped = {
+                            vibrate()
+                            viewModel.markSkipped()
+                        },
+                        onTogglePause = viewModel::togglePause,
+                        onFinishRound = viewModel::finishRound,
+                    )
 
-                Phase.LAST_WORD -> LastWordContent(
-                    game = game,
-                    onResolve = { teamId ->
-                        vibrate()
-                        viewModel.resolveLastWord(teamId)
-                    },
-                )
+                    Phase.LAST_WORD -> LastWordContent(
+                        game = game,
+                        onResolve = { teamId ->
+                            vibrate()
+                            viewModel.resolveLastWord(teamId)
+                        },
+                    )
 
-                Phase.REVIEW -> ReviewContent(
-                    game = game,
-                    onToggle = viewModel::toggleResult,
-                    onLastWordTeam = viewModel::setLastWordTeam,
-                    onConfirm = viewModel::confirmRound,
-                )
+                    Phase.REVIEW -> ReviewContent(
+                        game = game,
+                        onToggle = viewModel::toggleResult,
+                        onLastWordTeam = viewModel::setLastWordTeam,
+                        onConfirm = viewModel::confirmRound,
+                    )
 
-                Phase.FINISHED -> FinishedContent(
-                    game = game,
-                    onRematch = onRematch,
-                    onNewGame = onNewGame,
-                    onMenu = onExitToMenu,
-                )
+                    Phase.FINISHED -> FinishedContent(
+                        game = game,
+                        onRematch = onRematch,
+                        onNewGame = onNewGame,
+                        onMenu = onExitToMenu,
+                    )
+                }
             }
         }
     }

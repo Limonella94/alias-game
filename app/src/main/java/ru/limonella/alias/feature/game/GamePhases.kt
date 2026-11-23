@@ -41,6 +41,8 @@ import ru.limonella.alias.core.model.Word
 import ru.limonella.alias.ui.components.BigButton
 import ru.limonella.alias.ui.components.WordText
 import ru.limonella.alias.ui.theme.GameColors
+import ru.limonella.alias.ui.components.GlassCard
+import ru.limonella.alias.ui.components.GlassButton
 
 // Экраны для каждого этапа игры (см. Phase).
 
@@ -265,7 +267,7 @@ private fun AnyTeamLastWord(game: GameState, onResolve: (Int?) -> Unit) {
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
         )
-        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(32.dp)) {
+        GlassCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(32.dp)) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -279,12 +281,7 @@ private fun AnyTeamLastWord(game: GameState, onResolve: (Int?) -> Unit) {
         game.config.teams.forEach { team ->
             BigButton(team.name, onClick = { onResolve(team.id) })
         }
-        OutlinedButton(
-            onClick = { onResolve(null) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-        ) { Text("Никто") }
+        GlassButton(text = "Никто", onClick = { onResolve(null) })
     }
 }
 
@@ -410,20 +407,10 @@ internal fun FinishedContent(
         BigButton("Реванш", onRematch)
         Spacer(Modifier.height(8.dp))
         if (game.config.mode == GameMode.ADULT) {
-            OutlinedButton(
-                onClick = onNewGame,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-            ) { Text("Новая игра (другие настройки)") }
+            GlassButton(text = "Новая игра (другие настройки)", onClick = onNewGame)
             Spacer(Modifier.height(8.dp))
         }
-        OutlinedButton(
-            onClick = onMenu,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-        ) { Text("В меню") }
+        GlassButton(text = "В меню", onClick = onMenu)
     }
 }
 

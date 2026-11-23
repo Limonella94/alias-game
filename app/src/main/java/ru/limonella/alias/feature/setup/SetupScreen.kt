@@ -58,6 +58,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import ru.limonella.alias.core.model.LastWordRule
 import ru.limonella.alias.core.model.WordPack
 import ru.limonella.alias.ui.components.PackCover
+import androidx.compose.material3.TopAppBarDefaults
+import ru.limonella.alias.R
+import ru.limonella.alias.ui.components.ScreenBackground
+import ru.limonella.alias.ui.components.BigButton
+import ru.limonella.alias.ui.components.GlassCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,166 +74,166 @@ fun SetupScreen(
     val viewModel = setupViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Новая игра") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            Button(
-                onClick = { if (viewModel.saveConfig()) onStartGame() },
-                enabled = state.canStart,
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(16.dp)
-                    .height(60.dp),
-            ) {
-                Text("Начать игру", style = MaterialTheme.typography.titleLarge)
-            }
-        },
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item { SectionTitle("Команды") }
-            itemsIndexed(state.teams) { index, team ->
-                TeamEditor(
-                    index = index,
-                    team = team,
-                    canRemove = state.canRemoveTeam,
-                    canAddPlayer = team.players.size < SetupUiState.MAX_PLAYERS,
-                    onRename = { viewModel.renameTeam(index, it) },
-                    onRemove = { viewModel.removeTeam(index) },
-                    onAddPlayer = { viewModel.addPlayer(index) },
-                    onRenamePlayer = { playerIndex, name -> viewModel.renamePlayer(index, playerIndex, name) },
-                    onRemovePlayer = { playerIndex -> viewModel.removePlayer(index, playerIndex) },
+    ScreenBackground(image = R.drawable.bg_game) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    title = { Text("Новая игра") },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        }
+                    },
                 )
-            }
-            if (state.canAddTeam) {
-                item {
-                    OutlinedButton(onClick = viewModel::addTeam) {
-                        Icon(Icons.Filled.Add, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Добавить команду")
+            },
+            bottomBar = {
+                BigButton(
+                    text = "Начать игру",
+                    onClick = { if (viewModel.saveConfig()) onStartGame() },
+                    enabled = state.canStart,
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(16.dp),
+                )
+            },
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item { SectionTitle("Команды") }
+                itemsIndexed(state.teams) { index, team ->
+                    TeamEditor(
+                        index = index,
+                        team = team,
+                        canRemove = state.canRemoveTeam,
+                        canAddPlayer = team.players.size < SetupUiState.MAX_PLAYERS,
+                        onRename = { viewModel.renameTeam(index, it) },
+                        onRemove = { viewModel.removeTeam(index) },
+                        onAddPlayer = { viewModel.addPlayer(index) },
+                        onRenamePlayer = { playerIndex, name -> viewModel.renamePlayer(index, playerIndex, name) },
+                        onRemovePlayer = { playerIndex -> viewModel.removePlayer(index, playerIndex) },
+                    )
+                }
+                if (state.canAddTeam) {
+                    item {
+                        OutlinedButton(onClick = viewModel::addTeam) {
+                            Icon(Icons.Filled.Add, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Добавить команду")
+                        }
                     }
                 }
-            }
 
-            item { SectionTitle("Темы") }
-            item {
-                ThemesSummary(
-                    selected = state.packs.filter { it.id in state.selectedPackIds },
-                    onClick = onOpenThemes,
-                )
-            }
+                item { SectionTitle("Темы") }
+                item {
+                    ThemesSummary(
+                        selected = state.packs.filter { it.id in state.selectedPackIds },
+                        onClick = onOpenThemes,
+                    )
+                }
 
-            item { SectionTitle("Время раунда") }
-            item {
-                ChipRow(
-                    options = SetupUiState.ROUND_SECONDS_OPTIONS,
-                    isSelected = { it == state.roundSeconds },
-                    label = { "$it сек" },
-                    onClick = viewModel::setRoundSeconds,
-                )
-            }
+                item { SectionTitle("Время раунда") }
+                item {
+                    ChipRow(
+                        options = SetupUiState.ROUND_SECONDS_OPTIONS,
+                        isSelected = { it == state.roundSeconds },
+                        label = { "$it сек" },
+                        onClick = viewModel::setRoundSeconds,
+                    )
+                }
 
-            item { SectionTitle("Очки до победы") }
-            item {
-                ChipRow(
-                    options = SetupUiState.POINTS_OPTIONS,
-                    isSelected = { it == state.pointsToWin },
-                    label = { "$it" },
-                    onClick = viewModel::setPointsToWin,
-                )
-            }
+                item { SectionTitle("Очки до победы") }
+                item {
+                    ChipRow(
+                        options = SetupUiState.POINTS_OPTIONS,
+                        isSelected = { it == state.pointsToWin },
+                        label = { "$it" },
+                        onClick = viewModel::setPointsToWin,
+                    )
+                }
 
-            item { SectionTitle("Сложность слов") }
-            item {
-                ChipRow(
-                    options = SetupUiState.LEVEL_OPTIONS,
-                    isSelected = { it in state.levels },
-                    label = ::levelName,
-                    onClick = viewModel::toggleLevel,
-                )
-            }
-            item {
-                Text(
-                    text = if (state.wordsInGame > 0) {
-                        "Слов в игре: ${state.wordsInGame}"
-                    } else {
-                        "Выберите хотя бы одну тему и сложность"
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (state.wordsInGame > 0) {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    } else {
-                        MaterialTheme.colorScheme.error
-                    },
-                )
-            }
+                item { SectionTitle("Сложность слов") }
+                item {
+                    ChipRow(
+                        options = SetupUiState.LEVEL_OPTIONS,
+                        isSelected = { it in state.levels },
+                        label = ::levelName,
+                        onClick = viewModel::toggleLevel,
+                    )
+                }
+                item {
+                    Text(
+                        text = if (state.wordsInGame > 0) {
+                            "Слов в игре: ${state.wordsInGame}"
+                        } else {
+                            "Выберите хотя бы одну тему и сложность"
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (state.wordsInGame > 0) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                    )
+                }
 
-            item { SectionTitle("Правила") }
-            item {
-                SwitchRow(
-                    text = "Штраф за пропуск (−1 очко)",
-                    checked = state.skipPenalty,
-                    onCheckedChange = viewModel::setSkipPenalty,
-                )
-            }
-            item { SectionTitle("Последнее слово") }
-            item {
-                ChipRow(
-                    options = SetupUiState.LAST_WORD_OPTIONS,
-                    isSelected = { it == state.lastWord },
-                    label = ::lastWordName,
-                    onClick = viewModel::setLastWord,
-                )
-            }
-            item {
-                Text(
-                    lastWordDescription(state.lastWord),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+                item { SectionTitle("Правила") }
+                item {
+                    SwitchRow(
+                        text = "Штраф за пропуск (−1 очко)",
+                        checked = state.skipPenalty,
+                        onCheckedChange = viewModel::setSkipPenalty,
+                    )
+                }
+                item { SectionTitle("Последнее слово") }
+                item {
+                    ChipRow(
+                        options = SetupUiState.LAST_WORD_OPTIONS,
+                        isSelected = { it == state.lastWord },
+                        label = ::lastWordName,
+                        onClick = viewModel::setLastWord,
+                    )
+                }
+                item {
+                    Text(
+                        lastWordDescription(state.lastWord),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
 
-            item { SectionTitle("Прочее") }
-            item {
-                SwitchRow(
-                    text = "Звуки",
-                    checked = state.soundEnabled,
-                    onCheckedChange = viewModel::setSoundEnabled,
-                )
-            }
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text("История слов", style = MaterialTheme.typography.bodyLarge)
-                        Text(
-                            "Уже выпадало слов: ${state.shownWordsCount}. Новые слова идут первыми.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                item { SectionTitle("Прочее") }
+                item {
+                    SwitchRow(
+                        text = "Звуки",
+                        checked = state.soundEnabled,
+                        onCheckedChange = viewModel::setSoundEnabled,
+                    )
+                }
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text("История слов", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "Уже выпадало слов: ${state.shownWordsCount}. Новые слова идут первыми.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        TextButton(
+                            onClick = viewModel::resetWordHistory,
+                            enabled = state.shownWordsCount > 0,
+                        ) { Text("Сбросить") }
                     }
-                    TextButton(
-                        onClick = viewModel::resetWordHistory,
-                        enabled = state.shownWordsCount > 0,
-                    ) { Text("Сбросить") }
                 }
             }
         }
@@ -264,7 +269,7 @@ private fun TeamEditor(
     onRenamePlayer: (Int, String) -> Unit,
     onRemovePlayer: (Int) -> Unit,
 ) {
-    OutlinedCard(
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
     ) {
@@ -317,7 +322,7 @@ private fun TeamEditor(
 /** Карточка «Темы»: что выбрано, по нажатию — экран с плитками. */
 @Composable
 private fun ThemesSummary(selected: List<WordPack>, onClick: () -> Unit) {
-    Card(
+    GlassCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),

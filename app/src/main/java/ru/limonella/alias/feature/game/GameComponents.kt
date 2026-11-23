@@ -38,6 +38,10 @@ import ru.limonella.alias.core.engine.GameState
 import ru.limonella.alias.ui.components.WordPicture
 import ru.limonella.alias.ui.components.WordText
 import kotlin.math.roundToInt
+import ru.limonella.alias.ui.components.GlassCard
+import ru.limonella.alias.ui.theme.GlassStrong
+import ru.limonella.alias.ui.theme.GlassBorder
+import androidx.compose.foundation.BorderStroke
 
 /** Таблица счёта. [highlightTeamId] — чью строку подсветить. */
 @Composable
@@ -61,13 +65,9 @@ internal fun ScoreBoard(
         }
         game.config.teams.forEach { team ->
             val highlighted = team.id == highlightTeamId
-            Surface(
+            GlassCard(
                 shape = RoundedCornerShape(16.dp),
-                color = if (highlighted) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
+                highlighted = highlighted,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
@@ -127,7 +127,8 @@ internal fun SwipeableWordCard(
                 }
             },
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = GlassStrong),
+        border = BorderStroke(1.dp, GlassBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Box(

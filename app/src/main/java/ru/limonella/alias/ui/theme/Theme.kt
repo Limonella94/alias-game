@@ -1,49 +1,41 @@
 package ru.limonella.alias.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val LightColors = lightColorScheme(
-    primary = Grape,
-    onPrimary = Color.White,
-    primaryContainer = GrapeContainer,
-    onPrimaryContainer = Ink,
-    secondary = Coral,
-    onSecondary = Color.White,
-    tertiary = Sun,
-    onTertiary = Ink,
-    background = Paper,
-    onBackground = Ink,
-    surface = Color.White,
-    onSurface = Ink,
-)
-
-private val DarkColors = darkColorScheme(
-    primary = GrapeLight,
-    onPrimary = Ink,
-    primaryContainer = GrapeContainerDark,
-    onPrimaryContainer = Mist,
-    secondary = Coral,
-    onSecondary = Ink,
-    tertiary = Sun,
-    onTertiary = Ink,
-    background = Night,
-    onBackground = Mist,
-    surface = NightSurface,
-    onSurface = Mist,
+// Приложение всегда тёмное — так задумано стилем (фоны-картинки ночные).
+private val AliasColors = darkColorScheme(
+    primary = Amber,
+    onPrimary = AmberInk,
+    primaryContainer = Color(0xFF3A2C12),
+    onPrimaryContainer = AmberLight,
+    secondary = GraphiteHigh,
+    onSecondary = MoonSilver,
+    secondaryContainer = GraphiteHigh,
+    onSecondaryContainer = MoonSilver,
+    tertiary = Color(0xFF8FB8D8),
+    onTertiary = Graphite,
+    background = Graphite,
+    onBackground = MoonSilver,
+    surface = GraphiteRaised,
+    onSurface = MoonSilver,
+    surfaceVariant = GraphiteHigh,
+    onSurfaceVariant = FogGray,
+    surfaceContainer = GraphiteRaised,
+    surfaceContainerHigh = GraphiteHigh,
+    surfaceContainerHighest = GraphiteHigh,
+    outline = Color(0xFF4A505A),
+    outlineVariant = Color(0xFF353A42),
+    error = GameColors.Skipped,
+    onError = Color.White,
 )
 
 @Composable
-fun AliasTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
+fun AliasTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
+        colorScheme = AliasColors,
         typography = AliasTypography,
         content = content,
     )
