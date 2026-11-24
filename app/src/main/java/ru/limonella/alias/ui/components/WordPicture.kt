@@ -23,11 +23,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.limonella.alias.ui.theme.InkBrown
 
 /**
  * Карточка-картинка для детского режима и подпись под ней.
- * Если у слова есть нарисованная картинка ([image] — путь в assets) — показываем её
- * на белой «наклейке» со скруглёнными углами. Иначе — крупный эмодзи.
+ * Если у слова есть нарисованная картинка ([image] — путь в assets) — показываем её, иначе — крупный эмодзи.
+ * [onLight] — карточка светлая (детский режим): картинка без рамки, подпись тёмная.
+ * На тёмной карточке картинка лежит на белой «наклейке».
  */
 @Composable
 fun WordPicture(
@@ -38,6 +40,7 @@ fun WordPicture(
     emojiSize: TextUnit = 96.sp,
     imageSize: Dp = 170.dp,
     showCaption: Boolean = true,
+    onLight: Boolean = false,
 ) {
     val bitmap by rememberAssetImage(image)
     Column(
@@ -47,6 +50,13 @@ fun WordPicture(
     ) {
         val picture = bitmap
         when {
+            picture != null && onLight -> Image(
+                bitmap = picture,
+                contentDescription = text,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(imageSize),
+            )
+
             picture != null -> Box(
                 modifier = Modifier
                     .size(imageSize)
@@ -75,6 +85,7 @@ fun WordPicture(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
+                color = if (onLight) InkBrown else Color.Unspecified,
             )
         }
     }

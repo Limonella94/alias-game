@@ -47,6 +47,8 @@ import ru.limonella.alias.ui.components.ScreenBackground
 import ru.limonella.alias.ui.theme.GlassStrong
 import ru.limonella.alias.ui.theme.GlassBorder
 import androidx.compose.foundation.BorderStroke
+import ru.limonella.alias.ui.theme.Parchment
+import ru.limonella.alias.ui.components.GlassCard
 
 /**
  * «Малыши 3–5»: взрослый держит телефон, видит картинку и подпись,
@@ -103,7 +105,9 @@ fun KidsLittleScreen(onExit: () -> Unit) {
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1f),
                         )
-                        TextButton(onClick = viewModel::finish) { Text("Закончить") }
+                        GlassCard(color = GlassStrong, shape = RoundedCornerShape(50)) {
+                            TextButton(onClick = viewModel::finish) { Text("Закончить") }
+                        }
                     }
                     Card(
                         modifier = Modifier
@@ -111,14 +115,15 @@ fun KidsLittleScreen(onExit: () -> Unit) {
                             .fillMaxWidth()
                             .padding(vertical = 16.dp),
                         shape = RoundedCornerShape(40.dp),
-                        colors = CardDefaults.cardColors(containerColor = GlassStrong),
-                        border = BorderStroke(1.dp, GlassBorder),
+                        colors = CardDefaults.cardColors(containerColor = Parchment),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     ) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             WordPicture(
                                 emoji = word.emoji,
                                 image = word.image,
                                 imageSize = 260.dp,
+                                onLight = true,
                                 text = word.text,
                                 emojiSize = 160.sp,
                             )

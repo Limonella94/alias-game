@@ -42,6 +42,7 @@ import ru.limonella.alias.R
 import ru.limonella.alias.ui.components.ScreenBackground
 import ru.limonella.alias.ui.components.GlassCard
 import ru.limonella.alias.ui.components.GlassButton
+import ru.limonella.alias.ui.theme.GlassStrong
 import ru.limonella.alias.ui.theme.MoonSilver
 import ru.limonella.alias.ui.theme.FogGray
 import androidx.compose.foundation.Image
@@ -89,15 +90,8 @@ fun KidsScreen(
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Image(
-                    painter = painterResource(R.drawable.card_kids),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .clip(RoundedCornerShape(28.dp)),
-                )
+                // Небо с луной сверху остаётся открытым — заголовок ниже.
+                Spacer(Modifier.height(120.dp))
                 Text("Кто играет?", style = MaterialTheme.typography.headlineMedium, color = MoonSilver)
 
                 AgeCard(
@@ -140,7 +134,9 @@ private fun AgeCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        color = color.copy(alpha = 0.22f),
+        color = GlassStrong,
+        borderColor = color.copy(alpha = 0.7f),
+        borderWidth = 2.dp,
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -151,7 +147,7 @@ private fun AgeCard(
             Column {
                 Text(title, style = MaterialTheme.typography.headlineSmall, color = MoonSilver)
                 Spacer(Modifier.height(4.dp))
-                Text(description, style = MaterialTheme.typography.bodyMedium, color = FogGray)
+                Text(description, style = MaterialTheme.typography.bodyMedium, color = MoonSilver.copy(alpha = 0.85f))
             }
         }
     }

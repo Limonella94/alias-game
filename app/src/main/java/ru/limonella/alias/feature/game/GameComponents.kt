@@ -42,6 +42,7 @@ import ru.limonella.alias.ui.components.GlassCard
 import ru.limonella.alias.ui.theme.GlassStrong
 import ru.limonella.alias.ui.theme.GlassBorder
 import androidx.compose.foundation.BorderStroke
+import ru.limonella.alias.ui.theme.Parchment
 
 /** Таблица счёта. [highlightTeamId] — чью строку подсветить. */
 @Composable
@@ -130,8 +131,8 @@ internal fun SwipeableWordCard(
                 }
             },
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = GlassStrong),
-        border = BorderStroke(1.dp, GlassBorder),
+        colors = CardDefaults.cardColors(containerColor = if (picture) Parchment else GlassStrong),
+        border = if (picture) null else BorderStroke(1.dp, GlassBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Box(
@@ -140,7 +141,11 @@ internal fun SwipeableWordCard(
                 .padding(24.dp),
             contentAlignment = Alignment.Center,
         ) {
-            if (picture) WordPicture(emoji = emoji, text = text, image = image) else WordText(text)
+            if (picture) {
+                WordPicture(emoji = emoji, text = text, image = image, onLight = true)
+            } else {
+                WordText(text)
+            }
         }
     }
 }

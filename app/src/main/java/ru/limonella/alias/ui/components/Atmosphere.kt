@@ -91,13 +91,14 @@ fun GlassCard(
     color: Color = Glass,
     highlighted: Boolean = false,
     borderWidth: Dp = 1.dp,
+    borderColor: Color? = null,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val border = if (highlighted) {
         BorderStroke(2.dp, Amber.copy(alpha = 0.85f))
     } else {
-        BorderStroke(borderWidth, GlassBorder)
+        BorderStroke(borderWidth, borderColor ?: GlassBorder)
     }
     if (onClick != null) {
         Surface(

@@ -1,5 +1,7 @@
 package ru.limonella.alias.feature.setup
 
+import kotlin.math.roundToInt
+import androidx.compose.material3.Slider
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -140,21 +142,23 @@ fun SetupScreen(
 
                 item { SectionTitle("Время раунда") }
                 item {
-                    ChipRow(
-                        options = SetupUiState.ROUND_SECONDS_OPTIONS,
-                        isSelected = { it == state.roundSeconds },
+                    StepSlider(
+                        value = state.roundSeconds,
+                        range = SetupUiState.ROUND_SECONDS_RANGE,
+                        step = SetupUiState.ROUND_SECONDS_STEP,
                         label = { "$it сек" },
-                        onClick = viewModel::setRoundSeconds,
+                        onChange = viewModel::setRoundSeconds,
                     )
                 }
 
                 item { SectionTitle("Очки до победы") }
                 item {
-                    ChipRow(
-                        options = SetupUiState.POINTS_OPTIONS,
-                        isSelected = { it == state.pointsToWin },
-                        label = { "$it" },
-                        onClick = viewModel::setPointsToWin,
+                    StepSlider(
+                        value = state.pointsToWin,
+                        range = SetupUiState.POINTS_RANGE,
+                        step = SetupUiState.POINTS_STEP,
+                        label = { "$it очков" },
+                        onChange = viewModel::setPointsToWin,
                     )
                 }
 
@@ -389,6 +393,41 @@ private fun SectionTitle(text: String) {
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(top = 8.dp),
     )
+}
+
+/** Ползунок с шагом: значение крупно справа, под ним — сам ползунок. */
+@Composable
+private fun StepSlider(
+    value: Int,
+    range: IntRange,
+    step: Int,
+    label: (Int) -> String,
+    onChange: (Int) -> Unit,
+) {
+    val snapped = (((value - range.first) / step.toFloat()).roundToInt() * step + range.first)
+        .coerceIn(range.first, range.last)
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            label(snapped),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.align(Alignment.End),
+        )
+        Slider(
+            value = snapped.toFloat(),
+            onValueChange = { v ->
+                val next = ((v - range.first) / step).roundToInt() * step + range.first
+                if (next != snapped) onChange(next.coerceIn(range.first, range.last))
+            },
+            valueRange = range.first.toFloat()..range.last.toFloat(),
+            steps = (range.last - range.first) / step - 1,
+        )
+        Row(Modifier.fillMaxWidth()) {
+            Text(label(range.first), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.weight(1f))
+            Text(label(range.last), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
 }
 
 @Composable

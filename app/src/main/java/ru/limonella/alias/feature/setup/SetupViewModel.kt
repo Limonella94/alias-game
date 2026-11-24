@@ -59,8 +59,8 @@ data class SetupUiState(
 
     fun applySnapshot(s: SetupSnapshot) = copy(
         teams = s.teams.takeIf { it.size >= MIN_TEAMS } ?: teams,
-        roundSeconds = s.roundSeconds,
-        pointsToWin = s.pointsToWin,
+        roundSeconds = snap(s.roundSeconds, ROUND_SECONDS_RANGE, ROUND_SECONDS_STEP),
+        pointsToWin = snap(s.pointsToWin, POINTS_RANGE, POINTS_STEP),
         skipPenalty = s.skipPenalty,
         lastWord = s.lastWord,
         levels = s.levels,
@@ -69,13 +69,21 @@ data class SetupUiState(
     )
 
     companion object {
+        /** Привести значение к шагу ползунка (старые сохранения могли быть, например, 75). */
+        fun snap(value: Int, range: IntRange, step: Int): Int {
+            val steps = Math.round((value - range.first) / step.toFloat())
+            return (range.first + steps * step).coerceIn(range.first, range.last)
+        }
+
         const val MIN_TEAMS = 2
         const val MAX_TEAMS = 6
         const val MAX_PLAYERS = 10
         const val DEFAULT_PACK_ID = "ru_base"
         val DEFAULT_TEAM_NAMES = listOf("Котики", "Ёжики", "Совы", "Лисы", "Панды", "Еноты")
-        val ROUND_SECONDS_OPTIONS = listOf(30, 60, 90, 120)
-        val POINTS_OPTIONS = listOf(20, 30, 50, 75)
+        val ROUND_SECONDS_RANGE = 20..180
+        const val ROUND_SECONDS_STEP = 10
+        val POINTS_RANGE = 10..150
+        const val POINTS_STEP = 10
         val LEVEL_OPTIONS = listOf(1, 2, 3)
         val LAST_WORD_OPTIONS = listOf(LastWordRule.NONE, LastWordRule.ANY_TEAM, LastWordRule.OWN_TEAM)
     }

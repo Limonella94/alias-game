@@ -25,6 +25,10 @@ val Glass = Color(0xFF1C1F24).copy(alpha = 0.78f)
 val GlassStrong = Color(0xFF16181C).copy(alpha = 0.90f)
 val GlassBorder = Color.White.copy(alpha = 0.12f)
 
+/** Светлая «бумажная» карточка детского режима и тёмный текст на ней. */
+val Parchment = Color(0xFFFFFBF3)
+val InkBrown = Color(0xFF2B2118)
+
 /** Цвета игровых действий. */
 object GameColors {
     val Guessed = Color(0xFF4CAF7A)
