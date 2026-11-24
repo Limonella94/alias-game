@@ -80,8 +80,18 @@ jobs:
             gh api -X DELETE "repos/$REPO/releases/$id" || true
           done
           # Релиз не пересоздаём: заменяем файлы в существующем. Тег не трогаем — иначе GitHub делает релиз черновиком.
+          # GitHub иногда отвечает 502 — повторяем. Сначала APK, потом version.json:
+          # приложение никогда не увидит новую версию без файла APK.
+          upload() {
+            for i in 1 2 3 4 5; do
+              gh release upload latest "$1" --clobber && return 0
+              echo "Повтор загрузки $1 ($i)"; sleep $((i * 5))
+            done
+            return 1
+          }
           if gh release view latest --json isDraft >/dev/null 2>&1; then
-            gh release upload latest alias.apk version.json --clobber
+            upload alias.apk
+            upload version.json
             gh release edit latest --draft=false --prerelease --title "$TITLE" --notes "$NOTES"
           else
             gh release create latest alias.apk version.json \
@@ -90,3 +100,4 @@ jobs:
           sleep 5
           test "$(gh release view latest --json isDraft --jq .isDraft)" = "false"
           curl -fsSL -o /dev/null "https://github.com/$REPO/releases/download/latest/version.json"
+          curl -fsSL -o /dev/null "https://github.com/$REPO/releases/download/latest/alias.apk"
