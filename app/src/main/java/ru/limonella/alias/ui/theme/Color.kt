@@ -25,8 +25,11 @@ val Glass = Color(0xFF1C1F24).copy(alpha = 0.78f)
 val GlassStrong = Color(0xFF16181C).copy(alpha = 0.90f)
 val GlassBorder = Color.White.copy(alpha = 0.12f)
 
-/** Светлая «бумажная» карточка детского режима и тёмный текст на ней. */
-val Parchment = Color(0xFFFFFBF3)
+/**
+ * Светлая карточка детского режима. Цвет — ровно как фон детских картинок (#FEFEFE),
+ * чтобы картинка не выглядела отдельным квадратом. Новые картинки — тоже на этом белом.
+ */
+val Parchment = Color(0xFFFEFEFE)
 val InkBrown = Color(0xFF2B2118)
 
 /** Цвета игровых действий. */
